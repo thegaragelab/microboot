@@ -1,183 +1,61 @@
 ##############################################################
 
-# Babyduino (ATMega8, Internal Clock, 8MHz)
-babyduino2_8.name=Babyduino 2 (ATMega8, Internal Clock)
+# Microboard (ATMega8, Internal Clock, 8MHz)
+microboard_8.name=Microboard (ATMega8, Internal Clock)
 
-babyduino2_8.upload.protocol=arduino
-babyduino2_8.upload.maximum_size=7168
-babyduino2_8.upload.speed=38400
+microboard_8.upload.protocol=arduino
+microboard_8.upload.maximum_size=7168
+microboard_8.upload.speed=38400
 
-babyduino2_8.bootloader.low_fuses=0xa4
-babyduino2_8.bootloader.high_fuses=0xc2
-babyduino2_8.bootloader.path=babyboot
-babyduino2_8.bootloader.file=babyduino2_8.hex
-babyduino2_8.bootloader.unlock_bits=0x3F
-babyduino2_8.bootloader.lock_bits=0x0F
+microboard_8.bootloader.low_fuses=0xa4
+microboard_8.bootloader.high_fuses=0xc2
+microboard_8.bootloader.path=babyboot
+microboard_8.bootloader.file=microboard_8.hex
+microboard_8.bootloader.unlock_bits=0x3F
+microboard_8.bootloader.lock_bits=0x0F
 
-babyduino2_8.build.mcu=atmega8
-babyduino2_8.build.f_cpu=8000000L
-babyduino2_8.build.core=arduino:arduino
-babyduino2_8.build.variant=arduino:standard
+microboard_8.build.mcu=atmega8
+microboard_8.build.f_cpu=8000000L
+microboard_8.build.core=arduino:arduino
+microboard_8.build.variant=arduino:standard
 
-# Babyduino (ATMega8, External Clock, 8MHz)
-babyduino2_8_xc.name=Babyduino 2 (ATMega8, External Clock)
+# Microboard (ATMega88, Internal Clock, 8MHz)
+microboard_88.name=Microboard (ATMega88, Internal Clock)
 
-babyduino2_8_xc.upload.protocol=arduino
-babyduino2_8_xc.upload.maximum_size=7168
-babyduino2_8_xc.upload.speed=38400
+microboard_88.upload.protocol=arduino
+microboard_88.upload.maximum_size=7168
+microboard_88.upload.speed=38400
 
-babyduino2_8_xc.bootloader.low_fuses=0xbf
-babyduino2_8_xc.bootloader.high_fuses=0xc2
-babyduino2_8_xc.bootloader.path=babyboot
-babyduino2_8_xc.bootloader.file=babyduino2_8.hex
-babyduino2_8_xc.bootloader.unlock_bits=0x3F
-babyduino2_8_xc.bootloader.lock_bits=0x0F
+microboard_88.bootloader.low_fuses=0xe2
+microboard_88.bootloader.high_fuses=0xd5
+microboard_88.bootloader.extended_fuses=0x02
+microboard_88.bootloader.path=babyboot
+microboard_88.bootloader.file=microboard_88.hex
+microboard_88.bootloader.unlock_bits=0x3F
+microboard_88.bootloader.lock_bits=0x0F
 
-babyduino2_8_xc.build.mcu=atmega8
-babyduino2_8_xc.build.f_cpu=8000000L
-babyduino2_8_xc.build.core=arduino:arduino
-babyduino2_8_xc.build.variant=arduino:standard
+microboard_88.build.mcu=atmega88
+microboard_88.build.f_cpu=8000000L
+microboard_88.build.core=arduino:arduino
+microboard_88.build.variant=arduino:standard
 
-# Babyduino (ATMega88, Internal Clock, 8MHz)
-babyduino2_88.name=Babyduino 2 (ATMega88, Internal Clock)
+# Microboard (ATMega168, Internal Clock, 8MHz)
+microboard_168.name=Microboard (ATMega168, Internal Clock)
 
-babyduino2_88.upload.protocol=arduino
-babyduino2_88.upload.maximum_size=7168
-babyduino2_88.upload.speed=38400
+microboard_168.upload.protocol=arduino
+microboard_168.upload.maximum_size=15360
+microboard_168.upload.speed=38400
 
-babyduino2_88.bootloader.low_fuses=0xe2
-babyduino2_88.bootloader.high_fuses=0xd5
-babyduino2_88.bootloader.extended_fuses=0x02
-babyduino2_88.bootloader.path=babyboot
-babyduino2_88.bootloader.file=babyduino2_88.hex
-babyduino2_88.bootloader.unlock_bits=0x3F
-babyduino2_88.bootloader.lock_bits=0x0F
+microboard_168.bootloader.low_fuses=0xe2
+microboard_168.bootloader.high_fuses=0xd5
+microboard_168.bootloader.extended_fuses=0x02
+microboard_168.bootloader.path=babyboot
+microboard_168.bootloader.file=microboard_168.hex
+microboard_168.bootloader.unlock_bits=0x3F
+microboard_168.bootloader.lock_bits=0x0F
 
-babyduino2_88.build.mcu=atmega88
-babyduino2_88.build.f_cpu=8000000L
-babyduino2_88.build.core=arduino:arduino
-babyduino2_88.build.variant=arduino:standard
-
-# Babyduino (ATMega88, External Clock, 8MHz)
-babyduino2_88_xc.name=Babyduino 2 (ATMega88, External Clock)
-
-babyduino2_88_xc.upload.protocol=arduino
-babyduino2_88_xc.upload.maximum_size=7168
-babyduino2_88_xc.upload.speed=38400
-
-babyduino2_88_xc.bootloader.low_fuses=0xff
-babyduino2_88_xc.bootloader.high_fuses=0xd5
-babyduino2_88_xc.bootloader.extended_fuses=0x02
-babyduino2_88_xc.bootloader.path=babyboot
-babyduino2_88_xc.bootloader.file=babyduino2_88.hex
-babyduino2_88_xc.bootloader.unlock_bits=0x3F
-babyduino2_88_xc.bootloader.lock_bits=0x0F
-
-babyduino2_88_xc.build.mcu=atmega88
-babyduino2_88_xc.build.f_cpu=8000000L
-babyduino2_88_xc.build.core=arduino:arduino
-babyduino2_88_xc.build.variant=arduino:standard
-
-# Babyduino (ATMega168, Internal Clock, 8MHz)
-babyduino2_168.name=Babyduino 2 (ATMega168, Internal Clock)
-
-babyduino2_168.upload.protocol=arduino
-babyduino2_168.upload.maximum_size=15360
-babyduino2_168.upload.speed=38400
-
-babyduino2_168.bootloader.low_fuses=0xe2
-babyduino2_168.bootloader.high_fuses=0xd5
-babyduino2_168.bootloader.extended_fuses=0x02
-babyduino2_168.bootloader.path=babyboot
-babyduino2_168.bootloader.file=babyduino2_168.hex
-babyduino2_168.bootloader.unlock_bits=0x3F
-babyduino2_168.bootloader.lock_bits=0x0F
-
-babyduino2_168.build.mcu=atmega168
-babyduino2_168.build.f_cpu=8000000L
-babyduino2_168.build.core=arduino:arduino
-babyduino2_168.build.variant=arduino:standard
-
-# Babyduino (ATMega168, External Clock, 8MHz)
-babyduino2_168_xc.name=Babyduino 2 (ATMega168, External Clock)
-
-babyduino2_168_xc.upload.protocol=arduino
-babyduino2_168_xc.upload.maximum_size=15360
-babyduino2_168_xc.upload.speed=38400
-
-babyduino2_168_xc.bootloader.low_fuses=0xff
-babyduino2_168_xc.bootloader.high_fuses=0xd5
-babyduino2_168_xc.bootloader.extended_fuses=0x02
-babyduino2_168_xc.bootloader.path=babyboot
-babyduino2_168_xc.bootloader.file=babyduino2_168.hex
-babyduino2_168_xc.bootloader.unlock_bits=0x3F
-babyduino2_168_xc.bootloader.lock_bits=0x0F
-
-babyduino2_168_xc.build.mcu=atmega168
-babyduino2_168_xc.build.f_cpu=8000000L
-babyduino2_168_xc.build.core=arduino:arduino
-babyduino2_168_xc.build.variant=arduino:standard
-
-#----------------------------------------------------------------------------
-# Original Babyduino
-#----------------------------------------------------------------------------
-
-# Babyduino (ATMega8, Internal Clock, 8MHz)
-babyduino8_nc.name=Babyduino (ATMega8, Internal Clock)
-
-babyduino8_nc.upload.protocol=arduino
-babyduino8_nc.upload.maximum_size=7168
-babyduino8_nc.upload.speed=38400
-
-babyduino8_nc.bootloader.low_fuses=0xa4
-babyduino8_nc.bootloader.high_fuses=0xc2
-babyduino8_nc.bootloader.path=babyboot
-babyduino8_nc.bootloader.file=babyduino8_nc.hex
-babyduino8_nc.bootloader.unlock_bits=0x3F
-babyduino8_nc.bootloader.lock_bits=0x0F
-
-babyduino8_nc.build.mcu=atmega8
-babyduino8_nc.build.f_cpu=8000000L
-babyduino8_nc.build.core=arduino:arduino
-babyduino8_nc.build.variant=arduino:standard
-
-# Babyduino (ATMega88, Internal Clock, 8MHz)
-babyduino88_nc.name=Babyduino (ATMega88, Internal Clock)
-
-babyduino88_nc.upload.protocol=arduino
-babyduino88_nc.upload.maximum_size=7168
-babyduino88_nc.upload.speed=38400
-
-babyduino88_nc.bootloader.low_fuses=0xe2
-babyduino88_nc.bootloader.high_fuses=0xd5
-babyduino88_nc.bootloader.extended_fuses=0x02
-babyduino88_nc.bootloader.path=babyboot
-babyduino88_nc.bootloader.file=babyduino88_nc.hex
-babyduino88_nc.bootloader.unlock_bits=0x3F
-babyduino88_nc.bootloader.lock_bits=0x0F
-
-babyduino88_nc.build.mcu=atmega88
-babyduino88_nc.build.f_cpu=8000000L
-babyduino88_nc.build.core=arduino:arduino
-babyduino88_nc.build.variant=arduino:standard
-
-# Babyduino (ATMega168, Internal Clock, 8MHz)
-babyduino168_nc.name=Babyduino (ATMega168, Internal Clock)
-
-babyduino168_nc.upload.protocol=arduino
-babyduino168_nc.upload.maximum_size=15360
-babyduino168_nc.upload.speed=38400
-
-babyduino168_nc.bootloader.low_fuses=0xe2
-babyduino168_nc.bootloader.high_fuses=0xd5
-babyduino168_nc.bootloader.extended_fuses=0x02
-babyduino168_nc.bootloader.path=babyboot
-babyduino168_nc.bootloader.file=babyduino168_nc.hex
-babyduino168_nc.bootloader.unlock_bits=0x3F
-babyduino168_nc.bootloader.lock_bits=0x0F
-
-babyduino168_nc.build.mcu=atmega168
-babyduino168_nc.build.f_cpu=8000000L
-babyduino168_nc.build.core=arduino:arduino
-babyduino168_nc.build.variant=arduino:standard
+microboard_168.build.mcu=atmega168
+microboard_168.build.f_cpu=8000000L
+microboard_168.build.core=arduino:arduino
+microboard_168.build.variant=arduino:standard
 

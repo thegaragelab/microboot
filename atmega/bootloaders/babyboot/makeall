@@ -2,19 +2,9 @@
 #------------------------------------------------------------------
 # Make all supported bootloaders
 #------------------------------------------------------------------
-THIS_DIR=`dirname $0`
-THIS_DIR=`readlink -f ${THIS_DIR}`
-cd ${THIS_DIR}
 
 make clean
-
-# Babyduino Mk 2
-make babyduino2_8
-make babyduino2_88
-make babyduino2_168
-
-# Original Babyduino
-make babyduino8_nc
-make babyduino88_nc
-make babyduino168_nc
+make microboard_8
+make microboard_88
+make microboard_168
 

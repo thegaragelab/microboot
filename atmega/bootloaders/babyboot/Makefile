@@ -19,7 +19,7 @@ OBJCOPY        = avr-objcopy
 OBJDUMP        = avr-objdump
 SIZE           = avr-size
 
-all: babyduino8_nc
+all: microboard_8
 
 clean:
 	rm -rf *.s
@@ -27,84 +27,44 @@ clean:
 	rm -rf *.lst *.map
 
 #----------------------------------------------------------------------------
-# Babyduino (Mk 2)
+# ATmega Microboard
 #----------------------------------------------------------------------------
 
-# Babyduino - ATmega8 @8MHz
+# Microboard - ATmega8 @8MHz
 #
-babyduino2_8: TARGET = babyduino2_8
-babyduino2_8: MCU = atmega8
-babyduino2_8: MCU_TARGET = atmega8
-babyduino2_8: CFLAGS += -DF_CPU=8000000 -DBAUD_RATE=38400 -DBABYDUINO2
-babyduino2_8: LDSECTION  = --section-start=.text=0x1c00
-babyduino2_8: PROGRAM = $(PROGRAM1)
-babyduino2_8: $(PROGRAM1).o
-babyduino2_8: babyduino2_8.elf
-babyduino2_8: babyduino2_8.hex
+microboard_8: TARGET = microboard_8
+microboard_8: MCU = atmega8
+microboard_8: MCU_TARGET = atmega8
+microboard_8: CFLAGS += -DF_CPU=8000000 -DBAUD_RATE=38400 -DBABYDUINO2
+microboard_8: LDSECTION  = --section-start=.text=0x1c00
+microboard_8: PROGRAM = $(PROGRAM1)
+microboard_8: $(PROGRAM1).o
+microboard_8: microboard_8.elf
+microboard_8: microboard_8.hex
 
-# Babyduino - ATmega88 @8MHz
+# Microboard - ATmega88 @8MHz
 #
-babyduino2_88: TARGET = babyduino2_88
-babyduino2_88: MCU = atmega88
-babyduino2_88: MCU_TARGET = atmega88
-babyduino2_88: CFLAGS += -DF_CPU=8000000 -DBAUD_RATE=38400 -DBABYDUINO2
-babyduino2_88: LDSECTION  = --section-start=.text=0x1c00
-babyduino2_88: PROGRAM = $(PROGRAM2)
-babyduino2_88: $(PROGRAM2).o
-babyduino2_88: babyduino2_88.elf
-babyduino2_88: babyduino2_88.hex
+microboard_88: TARGET = microboard_88
+microboard_88: MCU = atmega88
+microboard_88: MCU_TARGET = atmega88
+microboard_88: CFLAGS += -DF_CPU=8000000 -DBAUD_RATE=38400 -DBABYDUINO2
+microboard_88: LDSECTION  = --section-start=.text=0x1c00
+microboard_88: PROGRAM = $(PROGRAM2)
+microboard_88: $(PROGRAM2).o
+microboard_88: microboard_88.elf
+microboard_88: microboard_88.hex
 
-# Babyduino - ATmega168 @8MHz
+# Microboard - ATmega168 @8MHz
 #
-babyduino2_168: TARGET = babyduino2_168
-babyduino2_168: MCU = atmega168
-babyduino2_168: MCU_TARGET = atmega168
-babyduino2_168: CFLAGS += -DF_CPU=8000000 -DBAUD_RATE=38400 -DBABYDUINO2
-babyduino2_168: LDSECTION  = --section-start=.text=0x3c00
-babyduino2_168: PROGRAM = $(PROGRAM2)
-babyduino2_168: $(PROGRAM2).o
-babyduino2_168: babyduino2_168.elf
-babyduino2_168: babyduino2_168.hex
-
-#----------------------------------------------------------------------------
-# Babyduino (Original)
-#----------------------------------------------------------------------------
-
-# Babyduino - ATmega8/Internal clock @8MHz
-#
-babyduino8_nc: TARGET = babyduino8_nc
-babyduino8_nc: MCU = atmega8
-babyduino8_nc: MCU_TARGET = atmega8
-babyduino8_nc: CFLAGS += -DF_CPU=8000000 -DBAUD_RATE=38400
-babyduino8_nc: LDSECTION  = --section-start=.text=0x1c00
-babyduino8_nc: PROGRAM = $(PROGRAM1)
-babyduino8_nc: $(PROGRAM1).o
-babyduino8_nc: babyduino8_nc.elf
-babyduino8_nc: babyduino8_nc.hex
-
-# Babyduino - ATmega88/Internal clock @8MHz
-#
-babyduino88_nc: TARGET = babyduino88_nc
-babyduino88_nc: MCU = atmega88
-babyduino88_nc: MCU_TARGET = atmega88
-babyduino88_nc: CFLAGS += -DF_CPU=8000000 -DBAUD_RATE=38400
-babyduino88_nc: LDSECTION  = --section-start=.text=0x1c00
-babyduino88_nc: PROGRAM = $(PROGRAM2)
-babyduino88_nc: $(PROGRAM2).o
-babyduino88_nc: babyduino88_nc.elf
-babyduino88_nc: babyduino88_nc.hex
-
-# Babyduino - ATmega168/Internal clock @8MHz
-#
-babyduino168_nc: TARGET = babyduino168_nc
-babyduino168_nc: MCU = atmega168
-babyduino168_nc: MCU_TARGET = atmega168
-babyduino168_nc: CFLAGS += -DF_CPU=8000000 -DBAUD_RATE=38400
-babyduino168_nc: LDSECTION  = --section-start=.text=0x3c00
-babyduino168_nc: PROGRAM = $(PROGRAM2)
-babyduino168_nc: $(PROGRAM2).o
-babyduino168_nc: babyduino168_nc.elf
-babyduino168_nc: babyduino168_nc.hex
+microboard_168: TARGET = microboard_168
+microboard_168: MCU = atmega168
+microboard_168: MCU_TARGET = atmega168
+microboard_168: CFLAGS += -DF_CPU=8000000 -DBAUD_RATE=38400 -DBABYDUINO2
+microboard_168: LDSECTION  = --section-start=.text=0x3c00
+microboard_168: PROGRAM = $(PROGRAM2)
+microboard_168: $(PROGRAM2).o
+microboard_168: microboard_168.elf
+microboard_168: microboard_168.hex
 
 # Common rules
 #
