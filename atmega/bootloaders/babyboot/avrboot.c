@@ -73,22 +73,28 @@
 #include <avr/eeprom.h>
 #endif
 
+// SWG: Hack, EEPE is the new EEWE
+#ifndef EEPE
+#  define EEPE EEWE
+#endif
+
 /* Use the F_CPU defined in Makefile */
 
 /* 20060803: hacked by DojoCorp */
 /* 20070626: hacked by David A. Mellis to decrease waiting time for auto-reset */
 /* set the waiting time for the bootloader */
-/* get this from the Makefile instead */
-/* #define MAX_TIME_COUNT (F_CPU>>4) */
+// How long to wait for boot loader, at 8MHz 2000000 will be about 1s
+#define MAX_TIME_COUNT (F_CPU>>4)
 
 /* 20070707: hacked by David A. Mellis - after this many errors give up and launch application */
 #define MAX_ERROR_COUNT 5
 
 /* set the UART baud rate */
 /* 20060803: hacked by DojoCorp */
-//#define BAUD_RATE   115200
-#define BAUD_RATE   19200
-
+// SWG: Expect the baud rate on the command line, use a default if not.
+#ifndef BAUD_RATE
+#  define BAUD_RATE   19200
+#endif
 
 /* SW_MAJOR and MINOR needs to be updated from time to time to avoid warning message from AVR Studio */
 /* never allow AVR Studio to do an update !!!! */
@@ -117,6 +123,7 @@
 
 /* onboard LED is used to indicate, that the bootloader was entered (3x flashing) */
 /* if monitor functions are included, LED goes on after monitor was entered */
+#define NUM_LED_FLASHES 3
 #ifdef __AVR_ATmega128__
 /* Onboard LED is connected to pin PB7 (e.g. Crumb128, PROBOmega128, Savvy128) */
 #define LED_DDR  DDRB
@@ -351,9 +358,10 @@ int main(void)
     UCSRB = _BV(TXEN)|_BV(RXEN);
 #endif
 
+// No LED on the Microboard
+#ifndef MICROBOARD
     /* set LED pin as output */
     LED_DDR |= _BV(LED);
-
 
     /* flash onboard LED to signal entering of bootloader */
 #ifdef __AVR_ATmega128__
@@ -362,6 +370,7 @@ int main(void)
 #else
     flash_led(NUM_LED_FLASHES);
 #endif
+#endif /* MICROBOARD */
 
     /* 20050803: by DojoCorp, this is one of the parts provoking the
                  system to stop listening, cancelled from the original */
@@ -956,6 +965,7 @@ void nothing_response(void)
     }
 }
 
+#ifndef MICROBOARD
 void flash_led(uint8_t count)
 {
     /* flash onboard LED three times to signal entering of bootloader */
@@ -974,6 +984,6 @@ void flash_led(uint8_t count)
         for(l = 0; l < (F_CPU / 1000); ++l);
     }
 }
-
+#endif /* MICROBOARD */
 
 /* end of file ATmegaBOOT.c */

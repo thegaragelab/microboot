@@ -2,8 +2,7 @@
 # E.Lins, 2004-10-14
 
 # program name should not be changed...
-PROGRAM1    = ATmegaBOOT
-PROGRAM2    = optiboot
+PROGRAM = avrboot
 
 OPTIMIZE    = -Os
 #OPTIMIZE   = -Os -funsigned-char -funsigned-bitfields -fpack-struct -fshort-enums -ffunction-sections -fdata-sections -fno-split-wide-types -Wl,--relax -fno-inline-small-functions -mcall-prologues
@@ -35,10 +34,9 @@ clean:
 microboard_8: TARGET = microboard_8
 microboard_8: MCU = atmega8
 microboard_8: MCU_TARGET = atmega8
-microboard_8: CFLAGS += -DF_CPU=8000000 -DBAUD_RATE=38400 -DBABYDUINO2
-microboard_8: LDSECTION  = --section-start=.text=0x1c00
-microboard_8: PROGRAM = $(PROGRAM1)
-microboard_8: $(PROGRAM1).o
+microboard_8: CFLAGS += -DF_CPU=8000000 -DBAUD_RATE=38400 -DMICROBOARD
+microboard_8: LDSECTION  = --section-start=.text=0x1800
+microboard_8: $(PROGRAM).o
 microboard_8: microboard_8.elf
 microboard_8: microboard_8.hex
 
@@ -47,10 +45,9 @@ microboard_8: microboard_8.hex
 microboard_88: TARGET = microboard_88
 microboard_88: MCU = atmega88
 microboard_88: MCU_TARGET = atmega88
-microboard_88: CFLAGS += -DF_CPU=8000000 -DBAUD_RATE=38400 -DBABYDUINO2
+microboard_88: CFLAGS += -DF_CPU=8000000 -DBAUD_RATE=38400 -DMICROBOARD
 microboard_88: LDSECTION  = --section-start=.text=0x1c00
-microboard_88: PROGRAM = $(PROGRAM2)
-microboard_88: $(PROGRAM2).o
+microboard_88: $(PROGRAM).o
 microboard_88: microboard_88.elf
 microboard_88: microboard_88.hex
 
@@ -59,10 +56,9 @@ microboard_88: microboard_88.hex
 microboard_168: TARGET = microboard_168
 microboard_168: MCU = atmega168
 microboard_168: MCU_TARGET = atmega168
-microboard_168: CFLAGS += -DF_CPU=8000000 -DBAUD_RATE=38400 -DBABYDUINO2
-microboard_168: LDSECTION  = --section-start=.text=0x3c00
-microboard_168: PROGRAM = $(PROGRAM2)
-microboard_168: $(PROGRAM2).o
+microboard_168: CFLAGS += -DF_CPU=8000000 -DBAUD_RATE=38400 -DMICROBOARD
+microboard_168: LDSECTION  = --section-start=.text=0x3800
+microboard_168: $(PROGRAM).o
 microboard_168: microboard_168.elf
 microboard_168: microboard_168.hex
 
@@ -74,10 +70,8 @@ microboard_168: microboard_168.hex
 	md5sum $@
 
 %.elf:
-	cp $(PROGRAM).o $(TARGET).o
-	rm $(PROGRAM).o
+	mv $(PROGRAM).o $(TARGET).o
 	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $(TARGET).o $(LIBS)
 
-$(PROGRAM1).o: $(PROGRAM1).c
-$(PROGRAM2).o: $(PROGRAM2).c
+$(PROGRAM).o: $(PROGRAM).c
 
