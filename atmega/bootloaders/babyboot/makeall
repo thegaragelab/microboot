@@ -5,6 +5,6 @@
 
 make clean
 make microboard_8
-make microboard_88
+#make microboard_88
 make microboard_168
 

@@ -7,8 +7,8 @@ microboard_8.upload.protocol=arduino
 microboard_8.upload.maximum_size=7168
 microboard_8.upload.speed=38400
 
-microboard_8.bootloader.low_fuses=0xa4
-microboard_8.bootloader.high_fuses=0xc2
+microboard_8.bootloader.low_fuses=0xe4
+microboard_8.bootloader.high_fuses=0xc0
 microboard_8.bootloader.path=babyboot
 microboard_8.bootloader.file=microboard_8.hex
 microboard_8.bootloader.unlock_bits=0x3F
@@ -19,26 +19,6 @@ microboard_8.build.f_cpu=8000000L
 microboard_8.build.core=arduino:arduino
 microboard_8.build.variant=arduino:standard
 
-# Microboard (ATMega88, Internal Clock, 8MHz)
-microboard_88.name=Microboard (ATMega88, Internal Clock)
-
-microboard_88.upload.protocol=arduino
-microboard_88.upload.maximum_size=7168
-microboard_88.upload.speed=38400
-
-microboard_88.bootloader.low_fuses=0xe2
-microboard_88.bootloader.high_fuses=0xd5
-microboard_88.bootloader.extended_fuses=0x02
-microboard_88.bootloader.path=babyboot
-microboard_88.bootloader.file=microboard_88.hex
-microboard_88.bootloader.unlock_bits=0x3F
-microboard_88.bootloader.lock_bits=0x0F
-
-microboard_88.build.mcu=atmega88
-microboard_88.build.f_cpu=8000000L
-microboard_88.build.core=arduino:arduino
-microboard_88.build.variant=arduino:standard
-
 # Microboard (ATMega168, Internal Clock, 8MHz)
 microboard_168.name=Microboard (ATMega168, Internal Clock)
 
@@ -47,8 +27,8 @@ microboard_168.upload.maximum_size=15360
 microboard_168.upload.speed=38400
 
 microboard_168.bootloader.low_fuses=0xe2
-microboard_168.bootloader.high_fuses=0xd5
-microboard_168.bootloader.extended_fuses=0x02
+microboard_168.bootloader.high_fuses=0xd7
+microboard_168.bootloader.extended_fuses=0x00
 microboard_168.bootloader.path=babyboot
 microboard_168.bootloader.file=microboard_168.hex
 microboard_168.bootloader.unlock_bits=0x3F
