@@ -17,6 +17,7 @@ override LDFLAGS       = -Wl,-Map,$(TARGET).map,$(LDSECTION)
 OBJCOPY        = avr-objcopy
 OBJDUMP        = avr-objdump
 SIZE           = avr-size
+AVRDUDE        = avrdude
 
 all: microboard_8
 
@@ -40,6 +41,14 @@ microboard_8: $(PROGRAM).o
 microboard_8: microboard_8.elf
 microboard_8: microboard_8.hex
 
+microboard_8_fuses: FUSE_HIGH = 0xC0
+microboard_8_fuses: FUSE_LOW = 0xE4
+microboard_8_fuses:
+	@$(AVRDUDE) -c usbasp -p m8 -u -U lfuse:w:$(FUSE_LOW):m -U hfuse:w:$(FUSE_HIGH):m
+
+microboard_8_flash: microboard_8.hex
+	@$(AVRDUDE) -c usbasp -p m8 -u -U flash:w:microboard_8.hex
+
 # Microboard - ATmega88 @8MHz
 #
 microboard_88: TARGET = microboard_88
@@ -61,6 +70,14 @@ microboard_168: LDSECTION  = --section-start=.text=0x3800
 microboard_168: $(PROGRAM).o
 microboard_168: microboard_168.elf
 microboard_168: microboard_168.hex
+
+microboard_168_fuses: FUSE_HIGH = 0xD7
+microboard_168_fuses: FUSE_LOW = 0xE2
+microboard_168_fuses:
+	@$(AVRDUDE) -c usbasp -p m8 -u -U lfuse:w:$(FUSE_LOW):m -U hfuse:w:$(FUSE_HIGH):m
+
+microboard_168_flash: microboard_168
+	@$(AVRDUDE) -c usbasp -p m168 -u -U flash:w:microboard_168.hex
 
 # Common rules
 #
