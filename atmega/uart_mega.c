@@ -23,10 +23,17 @@
 /** Initialise the UART
  */
 void uartInit() {
+#ifdef __AVR_ATmega8__
   UBRRH = (((F_CPU/BAUD_RATE)/16)-1)>>8;     // set baud rate
   UBRRL = (((F_CPU/BAUD_RATE)/16)-1);
   UCSRB = (1<<RXEN)|(1<<TXEN);               // enable Rx & Tx
   UCSRC = (1<<URSEL)|(1<<UCSZ1)|(1<<UCSZ0);  // config USART; 8N1
+#else
+  UBRR0H = (((F_CPU/BAUD_RATE)/16)-1)>>8;    // set baud rate
+  UBRR0L = (((F_CPU/BAUD_RATE)/16)-1);
+  UCSR0B = (1<<RXEN0)|(1<<TXEN0);            // enable Rx & Tx
+  UCSR0C = (1<<UCSZ01)|(1<<UCSZ00);          // config USART; 8N1
+#endif
   }
 
 /** Shutdown the UART
@@ -41,8 +48,13 @@ void uartDone() {
  * @return the character received.
  */
 char uartRecv() {
+#ifdef __AVR_ATmega8__
   while(!(inb(UCSRA) & _BV(RXC)));
   return (inb(UDR));
+#else
+  while(!(inb(UCSR0A) & _BV(RXC0)));
+  return (inb(UDR0));
+#endif
   }
 
 /** Write a single character
@@ -52,7 +64,12 @@ char uartRecv() {
  * @param ch the character to send.
  */
 void uartSend(char ch) {
+#ifdef __AVR_ATmega8__
   while (!(inb(UCSRA) & _BV(UDRE)));
   outb(UDR,ch);
+#else
+  while (!(inb(UCSR0A) & _BV(UDRE0)));
+  outb(UDR0,ch);
+#endif
   }
 
