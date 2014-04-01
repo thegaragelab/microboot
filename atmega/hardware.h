@@ -11,4 +11,9 @@
 // Baud rate to use
 #define BAUD_RATE 57600
 
+// Port and pin number to use (ATtiny only)
+#define UART_PORT PORTB
+#define UART_DDR  DDRB
+#define UART_PIN  PINB2
+
 #endif /* __HARDWARE_H */

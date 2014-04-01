@@ -20,8 +20,13 @@ AVRDUDE := avrdude
 
 # Main source
 SOURCES = \
-  microboot.c \
-  uart_mega.c
+  microboot.c
+
+ifeq ($(MCU), attiny85)
+  SOURCES += uart_tiny.c
+else
+  SOURCES += uart_mega.c
+endif
 
 # Derive object file names
 OBJECTS = $(filter-out $(SOURCES), $(patsubst %.c,%.o,$(SOURCES)) $(patsubst %.S,%.o,$(SOURCES)))
@@ -29,6 +34,7 @@ OBJECTS = $(filter-out $(SOURCES), $(patsubst %.c,%.o,$(SOURCES)) $(patsubst %.S
 .PHONY: all clean
 
 all: $(TARGET).hex
+	@cp $(TARGET).hex $(TARGET)-$(MCU).hex
 
 clean:
 	@rm -f $(OBJECTS) $(TARGET).hex $(TARGET).elf
