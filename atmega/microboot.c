@@ -8,6 +8,8 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <avr/io.h>
+#include <avr/pgmspace.h>
+#include <avr/interrupt.h>
 #include "hardware.h"
 #include "microboot.h"
 
@@ -38,6 +40,13 @@ uint8_t g_buffer[BUFFER_SIZE];
 // Helper functions
 //---------------------------------------------------------------------------
 
+/** Declares the main program
+ *
+ * Simply defines a function pointer to the base of memory. Calling it will
+ * execute the main program.
+ */
+void (*application)(void) = 0x0000;
+
 /** Determine if bootloader entry is required.
  *
  * @return true if the bootloader entry pin is low.
@@ -63,8 +72,15 @@ bool writeFlash() {
   }
 
 /** Fill the buffer from flash
+ *
+ * Uses the first two bytes of the global buffer as the address (high byte
+ * followed by low byte) and fills the remainder of the buffer with DATA_SIZE
+ * bytes from that address.
  */
 bool readFlash() {
+  uint16_t address = ((uint16_t)g_buffer[0] << 8) | g_buffer[1];
+  for(uint8_t index = 0; index<DATA_SIZE; index++, address++)
+    g_buffer[index + 2] = pgm_read_byte_near(address);
   return true;
   }
 
@@ -206,5 +222,5 @@ void main() {
 cleanup: // Clean up any hardware
   uartDone();
 launch: // Launch the main code
-  ;
+  application();
   }
