@@ -13,7 +13,7 @@ FUSE_EXT  = 0xFF
 TARGET  := microboot
 SIZE    := avr-size
 CXX     := avr-gcc
-CFLAGS  := -std=c99 -Wall -Os -mmcu=$(MCU) -DF_CPU=$(F_CPU)
+CFLAGS  := -std=gnu99 -Wall -Os -mmcu=$(MCU) -DF_CPU=$(F_CPU) -ffreestanding
 LDFLAGS := -mmcu=$(MCU)
 OBJCOPY := avr-objcopy
 AVRDUDE := avrdude

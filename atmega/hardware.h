@@ -8,4 +8,7 @@
 #ifndef __HARDWARE_H
 #define __HARDWARE_H
 
+// Baud rate to use
+#define BAUD_RATE 57600
+
 #endif /* __HARDWARE_H */
