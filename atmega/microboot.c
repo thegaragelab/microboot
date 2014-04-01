@@ -8,6 +8,8 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <avr/io.h>
+#include "hardware.h"
+#include "microboot.h"
 
 // Seed value for checksum
 #define CHECKSUM_SEED    0x5050
@@ -32,6 +34,10 @@
 
 uint8_t g_buffer[BUFFER_SIZE];
 
+//---------------------------------------------------------------------------
+// Helper functions
+//---------------------------------------------------------------------------
+
 /** Determine if bootloader entry is required.
  *
  * @return true if the bootloader entry pin is low.
@@ -46,21 +52,25 @@ inline uint16_t checksum(uint16_t total, uint8_t data) {
   return total + (uint16_t)data;
   }
 
-/** Initialise the UART
+//---------------------------------------------------------------------------
+// Flash access
+//---------------------------------------------------------------------------
+
+/** Write the current buffer contents into flash
  */
-inline void uartInit() {
+bool writeFlash() {
+  return true;
   }
 
-/** Shutdown the UART
+/** Fill the buffer from flash
  */
-inline void uartDone() {
+bool readFlash() {
+  return true;
   }
 
-/** Receive a single character
- */
-char uartRecv() {
-  return 0x00;
-  }
+//---------------------------------------------------------------------------
+// Serial interface
+//---------------------------------------------------------------------------
 
 /** Receive a hex character
  */
@@ -105,11 +115,6 @@ uint8_t uartRecvData() {
   return count;
   }
 
-/** Write a single character
- */
-void uartSend(char ch) {
-  }
-
 /** Write the low nybble of the value in hex
  */
 void uartSendHex(uint8_t value) {
@@ -128,7 +133,22 @@ void uartSendData(uint8_t size) {
     uartSendHex(((*pData)>>4)&0x0F);
     uartSendHex((*pData)&0x0F);
     }
+  uartSendHex((check >> 12) & 0x0F);
+  uartSendHex((check >> 8) & 0x0F);
+  uartSendHex((check >> 4) & 0x0F);
+  uartSendHex(check & 0x0F);
   }
+
+/** Send a failure message
+ */
+inline void uartSendFail() {
+  uartSend(FAIL);
+  uartSend(EOL);
+  }
+
+//---------------------------------------------------------------------------
+// Main program
+//---------------------------------------------------------------------------
 
 /** Program entry point
  */
@@ -140,10 +160,8 @@ void main() {
   while(true) {
     char ch = uartRecv();
     if(ch=='?') { // Get info
-      if(uartRecv()!=EOL) {
-        uartSend(FAIL);
-        uartSend(EOL);
-        }
+      if(uartRecv()!=EOL)
+        uartSendFail();
       else {
         g_buffer[0] = PROTOCOL_VERSION;
         g_buffer[1] = CPU_TYPE;
@@ -153,34 +171,36 @@ void main() {
         }
       }
     else if(ch=='!') { // Restart
-      if(uartRecv()!=EOL) {
-        uartSend(FAIL);
-        uartSend(EOL);
-        }
+      if(uartRecv()!=EOL)
+        uartSendFail();
       else
         goto cleanup;
       }
     else if(ch=='W') { // Write data
-      if(uartRecvData()!=WRITE_BYTES) {
-        uartSend(FAIL);
-        uartSend(EOL);
-        }
+      if(uartRecvData()!=WRITE_BYTES)
+        uartSendFail();
+      else if(!writeFlash())
+        uartSendFail();
       else {
         uartSend(OK);
         uartSend(EOL);
         }
       }
     else if(ch=='R') { // Read data
-      if(uartRecvData()!=READ_BYTES) {
-        uartSend(FAIL);
-        uartSend(EOL);
-        }
+      if(uartRecvData()!=READ_BYTES)
+        uartSendFail();
+      else if(!readFlash())
+        uartSendFail();
       else {
         uartSend(OK);
+        uartSendData(ADDRESS_SIZE + DATA_SIZE);
         uartSend(EOL);
         }
       }
     else { // Unknown character
+      while(ch!=EOL)
+        ch = uartRecv();
+      uartSendFail();
       }
     }
 cleanup: // Clean up any hardware
