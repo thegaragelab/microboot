@@ -34,7 +34,8 @@ OBJECTS = $(filter-out $(SOURCES), $(patsubst %.c,%.o,$(SOURCES)) $(patsubst %.S
 .PHONY: all clean
 
 all: $(TARGET).hex
-	@cp $(TARGET).hex $(TARGET)-$(MCU).hex
+	@mv $(TARGET).elf $(TARGET)-$(MCU).elf
+	@mv $(TARGET).hex $(TARGET)-$(MCU).hex
 
 clean:
 	@rm -f $(OBJECTS) $(TARGET).hex $(TARGET).elf
