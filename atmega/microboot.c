@@ -68,10 +68,24 @@ inline uint16_t checksum(uint16_t total, uint8_t data) {
 // Flash access
 //---------------------------------------------------------------------------
 
+// Check for SPM Control Register in processor.
+#if defined (SPMCSR)
+#  define __SPM_REG    SPMCSR
+#elif defined (SPMCR)
+#  define __SPM_REG    SPMCR
+#else
+#  error AVR processor does not provide bootloader support!
+#endif
+
 /** Write the current buffer contents into flash
  */
 bool writeFlash() {
-  while(bit_is_set(EECR,EEWE)); // Wait for previous EEPROM writes to complete
+   // Wait for previous EEPROM writes to complete
+#ifdef __AVR_ATmega8__
+  while(bit_is_set(EECR, EEWE));
+#else
+  while(bit_is_set(EECR, EEPE));
+#endif
   asm volatile(
     "  clr        r17                   \n\t"   //page_word_count
     "  lds        r30,g_buffer          \n\t"   //Address of FLASH location (in bytes)
@@ -131,7 +145,7 @@ bool writeFlash() {
     "  rjmp       write_page            \n\t"
     "block_done:                        \n\t"
     "  clr        __zero_reg__          \n\t"   //restore zero register
-    : "=m" (SPMCR)
+    : "=m" (__SPM_REG)
     : "M" (PAGE_SIZE), [data_size] "I" (DATA_SIZE)
     : "r0","r16","r17","r24","r25","r28","r29","r30","r31");
   return true;
