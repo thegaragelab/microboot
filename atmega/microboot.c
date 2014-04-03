@@ -264,6 +264,7 @@ void main() {
         g_buffer[2] = CPU_MODEL;
         uartSend(OK);
         uartSendData(3);
+        uartSend(EOL);
         }
       }
     else if(ch=='!') { // Restart
