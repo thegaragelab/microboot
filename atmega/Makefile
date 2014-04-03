@@ -2,6 +2,9 @@
 # Makefile for the AVR Microboot firmware
 #----------------------------------------------------------------------------
 
+# Debugging options
+SIMULATE  = 0
+
 # CPU specific options
 MCU       = atmega8
 F_CPU     = 8000000
@@ -22,10 +25,14 @@ AVRDUDE := avrdude
 SOURCES = \
   microboot.c
 
-ifeq ($(MCU), attiny85)
-  SOURCES += uart_tiny.c
+ifneq ($(SIMULATE), 0)
+  SOURCES += uart_simulavr.c
 else
-  SOURCES += uart_mega.c
+  ifeq ($(MCU), attiny85)
+    SOURCES += uart_tiny.c
+  else
+    SOURCES += uart_mega.c
+  endif
 endif
 
 # Derive object file names
