@@ -7,11 +7,25 @@
 import sys
 from microboot import Microboot, MicrobootException
 
+#--- Banner and usage information
+BANNER = """
+mbdump.py - Microboot/Microboard Firmware Dump Utility
+Copyright (c) 2014, The Garage Lab. All Rights Reserved.
+"""
+
+#----------------------------------------------------------------------------
+# Helper functions
+#----------------------------------------------------------------------------
+
 def showUsage():
   exit(1)
 
-#--- Main program
+#----------------------------------------------------------------------------
+# Main program
+#----------------------------------------------------------------------------
+
 if __name__ == "__main__":
+  print BANNER.strip() + "\n"
   # Set up defaults
   device = None
   port = "/dev/ttyUSB0"
