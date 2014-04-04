@@ -254,7 +254,31 @@ class Microboot:
 
         @throws MicrobootException if the connection attempt failed.
     """
-    pass
+    # If we are already connect, disconnect
+    self.disconnect()
+    # Verify the device type
+    device = device.lower()
+    if not CHIPLIST.has_key(device):
+      raise MicrobootException("Unrecognised device type '%s'" % device)
+    # Set up the serial port
+    self.serial = serial.Serial(
+      port = port,
+      baudrate = speed,
+      timeout = 0.2 # TODO: Should probably be configurable
+      )
+    # Get device data and verify
+    info = self.getInfo()
+    if info[0] < CHIPLIST[device][2]:
+      self.disconnect()
+      raise MicrobootException("Bootloader protocol is not supported. Wanted %d, got %d." % (CHIPLIST[device][2], info[0]))
+    if (info[1] <> CHIPLIST[device][0]) or (info[2] <> CHIPLIST[device][1]):
+      self.disconnect()
+      raise MicrobootException("Unexpected processor type - wanted %02X/%02X, got %02X/%02X." % (CHIPLIST[device][0], CHIPLIST[device][1], info[1], info[2]))
+    # Set up state
+    self.deviceName = device
+    self.deviceInfo = CHIPLIST[device]
+    # Done
+    return self.bootInfo
 
   def connected(self):
     """ Determine if we are connected to a device
@@ -285,9 +309,9 @@ class Microboot:
     """ Get the bootloader information tuple.
 
         This method queries the device for it's information block which includes
-        processor family, processor type and protocol version.
+        protocol version, processor family and processor type.
 
-        @return a 3-tuple of integers consisting of family, model and protocol
+        @return a 3-tuple of integers consisting of protocol, family and model
                 or None if a connection has not been established.
     """
     if not self.connected():
