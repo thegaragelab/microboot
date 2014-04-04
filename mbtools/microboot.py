@@ -267,7 +267,7 @@ class Microboot:
       timeout = 0.2 # TODO: Should probably be configurable
       )
     # Get device data and verify
-    info = self.getInfo()
+    info = self.getBootInfo()
     if info[0] < CHIPLIST[device][2]:
       self.disconnect()
       raise MicrobootException("Bootloader protocol is not supported. Wanted %d, got %d." % (CHIPLIST[device][2], info[0]))
@@ -305,7 +305,18 @@ class Microboot:
     self.bootInfo = None
     self.serial = None
 
-  def getInfo(self):
+  def getDeviceInfo(self, device = None):
+    """ Get device information
+    """
+    if device is None:
+      return self.deviceInfo
+    # Look it up
+    device = device.lower()
+    if CHIPLIST.has_key(device):
+      return CHIPLIST[device]
+    return None
+
+  def getBootInfo(self):
     """ Get the bootloader information tuple.
 
         This method queries the device for it's information block which includes
