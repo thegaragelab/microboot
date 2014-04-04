@@ -32,7 +32,18 @@
 // Identification information (protocol & CPU)
 #define PROTOCOL_VERSION 0x10
 #define CPU_TYPE         0x01
-#define CPU_MODEL        0x02
+
+#if defined(__AVR_ATtiny85__)
+#  define CPU_MODEL 0x01
+#elif defined(__AVR_ATmega8__)
+#  define CPU_MODEL 0x02
+#elif defined(__AVR_ATmega88__)
+#  define CPU_MODEL 0x03
+#elif defined(__AVR_ATmega168__)
+#  define CPU_MODEL 0x04
+#else
+#  error Unsupported CPU
+#endif
 
 // Size of flash pages in memory
 #define PAGE_SIZE	 0x20
