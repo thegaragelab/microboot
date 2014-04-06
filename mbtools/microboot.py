@@ -35,7 +35,6 @@ CMD_RESET     = '!'    # Character for the RESET command
 STATUS_OK     = '+'    # Character for OK status
 STATUS_FAIL   = '-'    # Character for FAIL status
 EOL           = '\n'   # Character to use for line termination
-DATA_SIZE     = 16     # Number of data bytes in a packet
 CHECKSUM_SEED = 0x5050 # Seed value for calculating checksum
 
 #--- Default values
@@ -148,17 +147,17 @@ class Microboot:
     # Make sure we have a sequence
     data = self.makeArray(data)
     # Make sure there is enough data
-    self.verifyRange(data, offset, DATA_SIZE)
+    self.verifyRange(data, offset, self.DATA_SIZE)
     # Calculate the checksum first
     check = CHECKSUM_SEED
     check = self.checksum(check, ((address >> 8) & 0xFF, address & 0xFF))
-    check = self.checksum(check, data, offset, DATA_SIZE)
+    check = self.checksum(check, data, offset, self.DATA_SIZE)
     # Now build up the string and return it
     return "%c%02X%02X%s%02X%02X%c" % (
       CMD_WRITE,
       (address >> 8) & 0xFF, # Address high byte
       address & 0xFF, # Address low byte
-      "".join([ "%02X" % val for val in data[offset:offset + DATA_SIZE] ]),
+      "".join([ "%02X" % val for val in data[offset:offset + self.DATA_SIZE] ]),
       (check >> 8) & 0xFF, # Checksum high byte
       check & 0xFF, # Checksum low byte
       EOL
@@ -271,7 +270,7 @@ class Microboot:
     if info[0] < CHIPLIST[device][2]:
       self.disconnect()
       raise MicrobootException("Bootloader protocol is not supported. Wanted %d, got %d." % (CHIPLIST[device][2], info[0]))
-    if (info[1] <> CHIPLIST[device][0]) or (info[2] <> CHIPLIST[device][1]):
+    if (info[2] <> CHIPLIST[device][0]) or (info[3] <> CHIPLIST[device][1]):
       self.disconnect()
       raise MicrobootException("Unexpected processor type - wanted %02X/%02X, got %02X/%02X." % (CHIPLIST[device][0], CHIPLIST[device][1], info[1], info[2]))
     # Set up state
@@ -331,9 +330,10 @@ class Microboot:
     if self.bootInfo is None:
       # Query the device for the information
       response = self.sendCommand("%c%c" % (CMD_QUERY, EOL))
-      if len(response) <> 5: # 3 data bytes, 2 checksum bytes
+      if len(response) <> 6: # 4 data bytes, 2 checksum bytes
         raise MicrobootException("Invalid response from device.")
-      self.bootInfo = tuple(response[:3])
+      self.bootInfo = tuple(response[:4])
+      self.DATA_SIZE = self.bootinfo[1]
     return self.bootInfo
 
   def read(self, start, length, callback = None):
@@ -364,10 +364,10 @@ class Microboot:
     # Check parameters
     if (start < 0) or (length < 0):
       raise MicrobootException("Parameters out of range - must be positive integers.")
-    # Determine the number of bytes to read (must be multiple of DATA_SIZE)
+    # Determine the number of bytes to read (must be multiple of self.DATA_SIZE)
     alength = length
-    if (alength % DATA_SIZE) <> 0:
-      alength = (int(length / DATA_SIZE) + 1) * DATA_SIZE
+    if (alength % self.DATA_SIZE) <> 0:
+      alength = (int(length / self.DATA_SIZE) + 1) * self.DATA_SIZE
     # Make sure the addresses are valid for the device
     chipInfo = CHIPLIST[self.deviceName]
     if (start < chipInfo[3]) or (start > chipInfo[4]) or ((start + length) > chipInfo[4]):
@@ -378,11 +378,11 @@ class Microboot:
     result = list()
     while read < alength:
       response = self.sendCommand(self.createReadCommand(address))
-      if len(response) <> (DATA_SIZE + 4): # Address + data + checksum
+      if len(response) <> (self.DATA_SIZE + 4): # Address + data + checksum
         raise MicrobootException("Invalid response from device.")
       result.extend(response[2:-2])
-      address = address + DATA_SIZE
-      read = read + DATA_SIZE
+      address = address + self.DATA_SIZE
+      read = read + self.DATA_SIZE
       if callback is not None:
         callback(min(read, length), length)
     # All done
@@ -417,30 +417,30 @@ class Microboot:
     # Make sure we have an array of data
     data = self.makeArray(data)
     self.verifyRange(data, 0, length)
-    # Determine the number of bytes to write (must be multiple of DATA_SIZE)
+    # Determine the number of bytes to write (must be multiple of self.DATA_SIZE)
     alength = length
-    if (alength % DATA_SIZE) <> 0:
-      alength = (int(length / DATA_SIZE) + 1) * DATA_SIZE
+    if (alength % self.DATA_SIZE) <> 0:
+      alength = (int(length / self.DATA_SIZE) + 1) * self.DATA_SIZE
     # Make sure the addresses are valid for the device
     chipInfo = CHIPLIST[self.deviceName]
     if (start < chipInfo[3]) or (start > chipInfo[4]) or ((start + length) > chipInfo[4]):
       raise MicrobootException("Address out of range for device - %04X:%04X" % (chipInfo[3], chipInfo[4]))
-    # If we have been given less than DATA_SIZE bytes to write, pad with what
+    # If we have been given less than self.DATA_SIZE bytes to write, pad with what
     # is already there
     if alength <> length:
-      current = self.read(start + alength - DATA_SIZE, DATA_SIZE)
-      data.extend(current[DATA_SIZE - (alegnth - length):])
+      current = self.read(start + alength - self.DATA_SIZE, self.DATA_SIZE)
+      data.extend(current[self.DATA_SIZE - (alegnth - length):])
     # Now write the data
     written = 0
     address = start
     result = list()
     while read < alength:
-      response = self.sendCommand(self.createWriteCommand(address, data, written, DATA_SIZE))
+      response = self.sendCommand(self.createWriteCommand(address, data, written, self.DATA_SIZE))
       if len(response) <> 0: # Should be no data in response
         raise MicrobootException("Invalid response from device.")
       result.extend(response[2:-2])
-      address = address + DATA_SIZE
-      written = written + DATA_SIZE
+      address = address + self.DATA_SIZE
+      written = written + self.DATA_SIZE
       if callback is not None:
         callback(min(written, length), length)
 
