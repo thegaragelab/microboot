@@ -219,8 +219,9 @@ void main() {
         uartSendFail();
       else {
         g_buffer[0] = PROTOCOL_VERSION;
-        g_buffer[1] = CPU_TYPE;
-        g_buffer[2] = CPU_MODEL;
+        g_buffer[1] = DATA_SIZE;
+        g_buffer[2] = CPU_TYPE;
+        g_buffer[3] = CPU_MODEL;
         uartSend(OK);
         uartSendData(3);
         uartSend(EOL);
