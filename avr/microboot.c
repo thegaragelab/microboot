@@ -223,7 +223,7 @@ void main() {
         g_buffer[2] = CPU_TYPE;
         g_buffer[3] = CPU_MODEL;
         uartSend(OK);
-        uartSendData(3);
+        uartSendData(4);
         uartSend(EOL);
         }
       }
