@@ -13,12 +13,19 @@ mbdump.py - Microboot/Microboard Firmware Dump Utility
 Copyright (c) 2014, The Garage Lab. All Rights Reserved.
 """
 
+#--- Communications log
+g_logFile = None
+
 #----------------------------------------------------------------------------
 # Helper functions
 #----------------------------------------------------------------------------
 
 def showUsage():
   exit(1)
+
+def logFunction(send, recv):
+  g_logFile.write(">" + send)
+  g_logFile.write("<" + recv)
 
 #----------------------------------------------------------------------------
 # Main program
@@ -40,6 +47,8 @@ if __name__ == "__main__":
     elif (arg == "--port") or (arg == "-p"):
       index = index + 1
       port = sys.argv[index]
+    elif (arg == "--log"):
+      g_logfile = open("transfer.log", "w")
     else:
       filename = arg
       index = index + 1
@@ -59,12 +68,18 @@ if __name__ == "__main__":
   info = mb.getDeviceInfo(device)
   if info is None:
     print "Unsupported device type '%s'." % device
-  size = info[4] - info[3] + 1
   # Show what we are doing
   print "Reading from '%s' on '%s'. Output in '%s'." % (device, port, filename)
   print "Will save %d bytes (0x%04X:0x%04X)." % (size, info[3], info[4])
+  # Set up logging if requested
+  if g_logFile is not None:
+    mb.logger = logFunction
+  # Connect to the device
   mb.connect(device, port)
+  # Read everything
+  size = info[4] - info[3] + 1
   data = mb.read(info[3], size)
   mb.disconnect()
   # TODO: Save the data
   print data
+
