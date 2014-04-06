@@ -73,6 +73,7 @@ class Microboot:
     self.deviceInfo = None
     self.bootInfo = None
     self.serial = None
+    self.logger = None
 
   #--------------------------------------------------------------------------
   # Helper methods
@@ -216,12 +217,16 @@ class Microboot:
         data = self.serial.read(1)
         if len(data) == 0:
           break
-        response = response + chr(data[0])
+        response = response + data[0]
         if response[:-1] == EOL:
           break
       # Do some basic validation on the response
       if len(response) >= 2:
         if response[:-1] == EOL:
+          # Provide an option to log it
+          if self.logger is not None:
+            self.logger(command, response)
+          # Do final input processing
           if response[0] == STATUS_OK:
             if len(response) == 2: # OK only
               return ()
@@ -265,6 +270,42 @@ class Microboot:
       baudrate = speed,
       timeout = 0.2 # TODO: Should probably be configurable
       )
+    # Get device data and verify
+    info = self.getBootInfo()
+    if info[0] < CHIPLIST[device][2]:
+      self.disconnect()
+      raise MicrobootException("Bootloader protocol is not supported. Wanted %d, got %d." % (CHIPLIST[device][2], info[0]))
+    if (info[2] <> CHIPLIST[device][0]) or (info[3] <> CHIPLIST[device][1]):
+      self.disconnect()
+      raise MicrobootException("Unexpected processor type - wanted %02X/%02X, got %02X/%02X." % (CHIPLIST[device][0], CHIPLIST[device][1], info[1], info[2]))
+    # Set up state
+    self.deviceName = device
+    self.deviceInfo = CHIPLIST[device]
+    # Done
+    return self.bootInfo
+
+  def connectEx(self, device, stream):
+    """ Connect to the device attached to the given port.
+
+        This will fail if there is a communication error on the port (or the
+        port does not exist), the device is not supported or the device on the
+        other end of the connection is not the expected device.
+
+        @param port the name of the serial port to connect on.
+        @param device the name of the device to expect.
+
+        @return the device information tuple (@see getInfo)
+
+        @throws MicrobootException if the connection attempt failed.
+    """
+    # If we are already connect, disconnect
+    self.disconnect()
+    # Verify the device type
+    device = device.lower()
+    if not CHIPLIST.has_key(device):
+      raise MicrobootException("Unrecognised device type '%s'" % device)
+    # Use the provided stream
+    self.serial = stream
     # Get device data and verify
     info = self.getBootInfo()
     if info[0] < CHIPLIST[device][2]:
