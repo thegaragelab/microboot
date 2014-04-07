@@ -5,7 +5,7 @@
 # Utility to dump the contents of a device.
 #----------------------------------------------------------------------------
 import sys
-from os.path import splitext
+from os.path import splitext, basename
 from intelhex import IntelHex
 from microboot import Microboot, MicrobootException
 
@@ -17,6 +17,22 @@ mbdump.py - Microboot/Microboard Firmware Dump Utility
 Copyright (c) 2014, The Garage Lab. All Rights Reserved.
 """
 
+USAGE = """
+Usage:
+
+  %s options [filename]
+
+Options:
+  -d,--device name  Specify the expected device, eg: attiny85,atmega8. This
+                    is required.
+  -p,--port name    Specify the name of the serial port to use for communication.
+                    If not specified the port /dev/ttyUSB0 will be used.
+  --log             Log all communications to the file 'transfer.log'
+
+If a filename is not specified the output will be saved in the file 'device'.hex,
+eg atmega8.hex if the device is an atmega8.
+"""
+
 #--- Communications log
 g_logFile = None
 
@@ -25,6 +41,7 @@ g_logFile = None
 #----------------------------------------------------------------------------
 
 def showUsage():
+  print USAGE.strip() % basename(sys.argv[0])
   exit(1)
 
 def logFunction(send, recv):
