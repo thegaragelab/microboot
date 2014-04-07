@@ -5,7 +5,11 @@
 # Utility to dump the contents of a device.
 #----------------------------------------------------------------------------
 import sys
+from os.path import splitext
+from intelhex import IntelHex
 from microboot import Microboot, MicrobootException
+
+from random import getrandbits
 
 #--- Banner and usage information
 BANNER = """
@@ -62,24 +66,32 @@ if __name__ == "__main__":
     showUsage()
   if filename is None:
     filename = device + ".hex"
-  # TODO: Add default extension to filename
+  # Add default extension to filename
+  name, ext = splitext(filename)
+  if ext == "":
+    filename = name + ".hex"
   # Set up the device interface
   mb = Microboot()
   info = mb.getDeviceInfo(device)
   if info is None:
     print "Unsupported device type '%s'." % device
   # Show what we are doing
-  print "Reading from '%s' on '%s'. Output in '%s'." % (device, port, filename)
-  print "Will save %d bytes (0x%04X:0x%04X)." % (size, info[3], info[4])
+  size = info[4] - info[3] + 1
+  print "Reading %d bytes (0x%04X:0x%04X) from '%s' on '%s'." % (size, info[3], info[4], device, port)
   # Set up logging if requested
   if g_logFile is not None:
     mb.logger = logFunction
   # Connect to the device
   mb.connect(device, port)
   # Read everything
-  size = info[4] - info[3] + 1
   data = mb.read(info[3], size)
   mb.disconnect()
-  # TODO: Save the data
-  print data
+  # Create the HEX file
+  hexfile = IntelHex()
+  address = info[3]
+  for val in data:
+    hexfile[address] = val
+    address = address + 1
+  hexfile.tofile(filename, "hex")
+  print "Output written to '%s'." % filename
 
