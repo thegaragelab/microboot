@@ -95,6 +95,8 @@ char uartRecv() {
  * @param ch the character to send.
  */
 void uartSend(char ch) {
+  // Set to idle state
+  UART_PORT |= (1 << UART_PIN);
   asm volatile(
     "  sbi %[uart_port]-1, %[uart_pin]  \n\t"  // set Tx line to output
     "  cbi %[uart_port], %[uart_pin]    \n\t"  // start bit
