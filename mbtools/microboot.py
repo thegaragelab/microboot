@@ -74,6 +74,7 @@ class Microboot:
     self.bootInfo = None
     self.serial = None
     self.logger = None
+    self.DATA_SIZE = None
 
   #--------------------------------------------------------------------------
   # Helper methods
@@ -411,7 +412,7 @@ class Microboot:
       alength = (int(length / self.DATA_SIZE) + 1) * self.DATA_SIZE
     # Make sure the addresses are valid for the device
     chipInfo = CHIPLIST[self.deviceName]
-    if (start < chipInfo[3]) or (start > chipInfo[4]) or ((start + length) > chipInfo[4]):
+    if (start < chipInfo[3]) or (start > chipInfo[4]) or ((start + length - 1) > chipInfo[4]):
       raise MicrobootException("Address out of range for device - %04X:%04X" % (chipInfo[3], chipInfo[4]))
     # Now do the read
     read = 0
