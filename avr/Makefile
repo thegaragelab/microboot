@@ -25,8 +25,8 @@ PROCESSOR :=
 # Fuse settings and start address
 ifeq ($(MCU), attiny85)
   PROCESSOR = t85
-#  FUSE_HIGH  = 0x5F (RESET disabled)
-  FUSE_HIGH  = 0xDF
+#  FUSE_HIGH  = 0x5D (RESET disabled)
+  FUSE_HIGH  = 0xDD
   FUSE_LOW   = 0xE2
   FUSE_EXT   = 0xFE
   BOOT_START = 0x1C00
