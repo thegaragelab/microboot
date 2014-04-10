@@ -49,8 +49,9 @@ void uartDone() {
  */
 char uartRecv() {
 #ifdef __AVR_ATmega8__
-  while(!(inb(UCSRA) & _BV(RXC)));
-  return (inb(UDR));
+  /* Wait for data to be received */
+  while(!(UCSRA&(1<<RXC)));
+  return (char)UDR;
 #else
   while(!(inb(UCSR0A) & _BV(RXC0)));
   return (inb(UDR0));
@@ -65,8 +66,8 @@ char uartRecv() {
  */
 void uartSend(char ch) {
 #ifdef __AVR_ATmega8__
-  while (!(inb(UCSRA) & _BV(UDRE)));
-  outb(UDR,ch);
+  while(!(UCSRA&(1<<UDRE)));
+  UDR = ch;
 #else
   while (!(inb(UCSR0A) & _BV(UDRE0)));
   outb(UDR0,ch);
