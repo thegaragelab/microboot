@@ -9,7 +9,7 @@ from microboot import Microboot, MicrobootException
 
 #--- Banner and usage information
 BANNER = """
-mbdump.py - Microboot/Microboard Command Testing Utility
+gencommand.py - Microboot/Microboard Command Testing Utility
 Copyright (c) 2014, The Garage Lab. All Rights Reserved.
 """
 
@@ -67,7 +67,7 @@ if __name__ == "__main__":
     print "Error: Command must be one of 'read' or 'write'.\n"
     showUsage()
   if (command == "write") and (filename is None):
-    print "Error: You must specify and input file with the 'write' command\n"
+    print "Error: You must specify an input file with the 'write' command\n"
     showUsage()
   # Show information
   print "Device    : %s" % device
