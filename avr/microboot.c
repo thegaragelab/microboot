@@ -45,8 +45,9 @@
 #  error Unsupported CPU
 #endif
 
-uint8_t g_buffer[BUFFER_SIZE];
-uint8_t g_pagecache[SPM_PAGESIZE];
+uint8_t  g_buffer[BUFFER_SIZE];
+uint8_t  g_pagecache[SPM_PAGESIZE];
+uint16_t g_page_address;
 
 //---------------------------------------------------------------------------
 // Helper functions
@@ -92,17 +93,65 @@ bool writeFlash() {
   uint16_t address = (((uint16_t)g_buffer[0] << 8) & 0xFF00) | g_buffer[1];
   uint8_t index, written = 0;
   while(written<DATA_SIZE) {
-    uint16_t page_address = (address / SPM_PAGESIZE) * SPM_PAGESIZE;
-    uint8_t page = address / SPM_PAGESIZE;
+    g_page_address = (address / SPM_PAGESIZE) * SPM_PAGESIZE;
     // Read the page into the buffer
     for(index=0; index<SPM_PAGESIZE; index++)
       g_pagecache[index] = pgm_read_byte_near(address);
     // Add in our data
-    uint8_t offset = (uint8_t)(address - page_address);
+    uint8_t offset = (uint8_t)(address - g_page_address);
     for(index=0;(written<DATA_SIZE)&&((offset + index)<SPM_PAGESIZE);written++,index++)
       g_pagecache[offset + index] = g_buffer[written + 2];
+    // Write the page
+    asm volatile(
+      // Y points to memory buffer, Z points to flash page
+      "  lds   r30, g_page_address           \n\t"
+      "  lds   r31, g_page_address + 1       \n\t"
+      "  ldi   r28, lo8(g_pagecache)         \n\t"
+      "  ldi   r29, hi8(g_pagecache)         \n\t"
+      // First erase the selected page
+      "  ldi   r16, (1<<PGERS) | (1<<SPMEN)  \n\t"
+      "  rcall exec_spm                      \n\t"
+#if !defined(__AVR_ATtiny85__)
+      // Re-enable the RWW section
+      "  ldi   r16, (1<<RWWSRE) | (1<<SPMEN) \n\t"
+      "  rcall exec_spm"
+#endif
+      // Transfer data from RAM to Flash page buffer
+      "  ldi   loopl, %[spm_pagesize]        \n\t"
+      "write_loop:                           \n\t"
+      "  ld    r0, Y+                        \n\t"
+      "  ld    r1, Y+                        \n\t"
+      "  ldi   r16, (1<<SPMEN)               \n\t"
+      "  rcall exec_spm                      \n\t"
+      "  adiw  ZH:ZL, 2                      \n\t"
+      "  subi  looplo, 2                     \n\t"
+      "  brne  write_loop                    \n\t"
+      // Execute page write
+      "  subi  ZL, %[spm_pagesize]           \n\t"
+      "  ldi   r16, (1<<PGWRT) | (1<<SPMEN)  \n\t"
+      "  rcall exec_spm                      \n\t"
+#if !defined(__AVR_ATtiny85__)
+      // Re-enable the RWW section
+      "  ldi   r16, (1<<RWWSRE) | (1<<SPMEN) \n\t"
+      "  rcall exec_spm                      \n\t"
+#endif
+      "  rjmp  end_write                     \n\t"
+      "exec_spm:                             \n\t"
+      // Wait for previous SPM to complete
+      "wait_spm:                             \n\t"
+      "  in    r17, %[spm_reg]               \n\t"
+      "  sbrc  r17, SPMEN                    \n\t"
+      "  rjmp  wait_spm                      \n\t"
+      // SPM timed sequence
+      "  out %[spm_reg], r16                 \n\t"
+      "  spm                                 \n\t"
+      "  ret                                 \n\t"
+      "end_write:                            \n\t"
+      : [spm_reg] "=m" (__SPM_REG)
+      : [spm_pagesize] "M" (SPM_PAGESIZE)
+      : "r0","r16","r17","r19","r28","r29","r30","r31");
 
-    // TODO: Write the page
+// TODO: Write the page
 
     // Update addresses
     address = address + written;
