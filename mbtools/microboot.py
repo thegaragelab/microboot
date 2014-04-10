@@ -218,12 +218,12 @@ class Microboot:
         data = self.serial.read(1)
         if len(data) == 0:
           break
-        response = response + data[0]
-        if response[:-1] == EOL:
+        response = response + data
+        if data == EOL:
           break
       # Do some basic validation on the response
       if len(response) >= 2:
-        if response[:-1] == EOL:
+        if response[-1:] == EOL:
           # Provide an option to log it
           if self.logger is not None:
             self.logger(command, response)
@@ -265,6 +265,7 @@ class Microboot:
     device = device.lower()
     if not CHIPLIST.has_key(device):
       raise MicrobootException("Unrecognised device type '%s'" % device)
+    self.deviceName = device
     # Set up the serial port
     self.serial = serial.Serial(
       port = port,
@@ -375,7 +376,7 @@ class Microboot:
       if len(response) <> 6: # 4 data bytes, 2 checksum bytes
         raise MicrobootException("Invalid response from device.")
       self.bootInfo = tuple(response[:4])
-      self.DATA_SIZE = self.bootinfo[1]
+      self.DATA_SIZE = self.bootInfo[1]
     return self.bootInfo
 
   def read(self, start, length, callback = None):
