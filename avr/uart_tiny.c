@@ -39,9 +39,9 @@
 /** Initialise the UART
  */
 void uartInit() {
-  // Initialise the UART pin as output and put in idle (high) state
-  UART_PORT |= (1 << UART_PIN);
-  UART_DDR  |= (1 << UART_PIN);
+  // Set as input and disable pullup
+  UART_DDR  &= ~(1 << UART_PIN);
+  UART_PORT &= ~(1 << UART_PIN);
   }
 
 /** Shutdown the UART
@@ -58,11 +58,12 @@ void uartDone() {
  */
 char uartRecv() {
   char ch;
+  // Set as input and disable pullup
+  UART_DDR  &= ~(1 << UART_PIN);
+  UART_PORT &= ~(1 << UART_PIN);
+  // Read the byte
   asm volatile(
-    "  cbi %[uart_port]-1, %[uart_pin]   \n\t" // set Rx line to input
-    "  ldi r28, %[rxdelay]               \n\t"
     "  ldi r18, %[rxdelay2]              \n\t" // 1.5 bit delay
-    "  ldi r19, 0xff                     \n\t" // Around 5 bits @ 57.6KBaud
     "  ldi %0, 0x80                      \n\t" // bit shift counter
     "WaitStart:                          \n\t"
     "  sbic %[uart_port]-2, %[uart_pin]  \n\t" // wait for start edge
@@ -72,8 +73,8 @@ char uartRecv() {
     // delay (3 cycle * r18) -1 and clear carry with subi
     "  subi r18, 1                       \n\t"
     "  brne RxBit                        \n\t"
-    "  mov r18, r28                      \n\t"
-    "  sbic %[uart_port]-2, %[uart_pin] \n\t" // check UART PIN
+    "  ldi r18, %[rxdelay]               \n\t"
+    "  sbic %[uart_port]-2, %[uart_pin]  \n\t" // check UART PIN
     "  sec                               \n\t"
     "  ror %0                            \n\t"
     "  brcc RxBit                        \n\t"
@@ -85,7 +86,7 @@ char uartRecv() {
       [uart_pin] "I" (UART_PIN),
       [rxdelay] "I" (RXDELAY),
       [rxdelay2] "I" (RXDELAY2)
-    : "r0","r18","r19","r28");
+    : "r0","r18","r19");
   return ch;
   }
 
@@ -96,10 +97,10 @@ char uartRecv() {
  * @param ch the character to send.
  */
 void uartSend(char ch) {
-  // Set to idle state
+  // Set to output state and bring high
   UART_PORT |= (1 << UART_PIN);
+  UART_DDR  |= (1 << UART_PIN);
   asm volatile(
-    "  sbi %[uart_port]-1, %[uart_pin]  \n\t"  // set Tx line to output
     "  cbi %[uart_port], %[uart_pin]    \n\t"  // start bit
     "  in r0, %[uart_port]              \n\t"
     "  ldi r30, 3                       \n\t"  // stop bit + idle state
@@ -124,6 +125,7 @@ void uartSend(char ch) {
       [ch] "r" (ch)
     : "r0","r28","r29","r30");
   // Change back to idle state
-  UART_PORT |= (1 << UART_PIN);
+  UART_DDR  &= ~(1 << UART_PIN);
+  UART_PORT &= ~(1 << UART_PIN);
   }
 
