@@ -104,52 +104,59 @@ bool writeFlash() {
     // Write the page
     asm volatile(
       // Y points to memory buffer, Z points to flash page
-      "  lds   r30, g_page_address           \n\t"
-      "  lds   r31, g_page_address + 1       \n\t"
-      "  ldi   r28, lo8(g_pagecache)         \n\t"
-      "  ldi   r29, hi8(g_pagecache)         \n\t"
+      "  lds   r30, g_page_address                 \n\t"
+      "  lds   r31, g_page_address + 1             \n\t"
+      "  ldi   r28, lo8(g_pagecache)               \n\t"
+      "  ldi   r29, hi8(g_pagecache)               \n\t"
       // First erase the selected page
-      "  ldi   r16, (1<<PGERS) | (1<<SPMEN)  \n\t"
-      "  rcall exec_spm                      \n\t"
+      "  ldi   r16, (1<<%[pgers]) | (1<<%[spmen])  \n\t"
+      "  rcall exec_spm                            \n\t"
 #if !defined(__AVR_ATtiny85__)
       // Re-enable the RWW section
-      "  ldi   r16, (1<<RWWSRE) | (1<<SPMEN) \n\t"
-      "  rcall exec_spm"
+      "  ldi   r16, (1<<%[rwwsre]) | (1<<%[spmen]) \n\t"
+      "  rcall exec_spm                            \n\t"
 #endif
       // Transfer data from RAM to Flash page buffer
-      "  ldi   loopl, %[spm_pagesize]        \n\t"
-      "write_loop:                           \n\t"
-      "  ld    r0, Y+                        \n\t"
-      "  ld    r1, Y+                        \n\t"
-      "  ldi   r16, (1<<SPMEN)               \n\t"
-      "  rcall exec_spm                      \n\t"
-      "  adiw  ZH:ZL, 2                      \n\t"
-      "  subi  looplo, 2                     \n\t"
-      "  brne  write_loop                    \n\t"
+      "  ldi   r20, %[spm_pagesize]                \n\t"
+      "write_loop:                                 \n\t"
+      "  ld    r0, Y+                              \n\t"
+      "  ld    r1, Y+                              \n\t"
+      "  ldi   r16, (1<<%[spmen])                  \n\t"
+      "  rcall exec_spm                            \n\t"
+      "  adiw  r30, 2                              \n\t"
+      "  subi  r20, 2                              \n\t"
+      "  brne  write_loop                          \n\t"
       // Execute page write
-      "  subi  ZL, %[spm_pagesize]           \n\t"
-      "  ldi   r16, (1<<PGWRT) | (1<<SPMEN)  \n\t"
-      "  rcall exec_spm                      \n\t"
+      "  subi  r30, %[spm_pagesize]                \n\t"
+      "  ldi   r16, (1<<%[pgwrt]) | (1<<%[spmen])  \n\t"
+      "  rcall exec_spm                            \n\t"
 #if !defined(__AVR_ATtiny85__)
       // Re-enable the RWW section
-      "  ldi   r16, (1<<RWWSRE) | (1<<SPMEN) \n\t"
-      "  rcall exec_spm                      \n\t"
+      "  ldi   r16, (1<<%[rwwsre]) | (1<<%[spmen]) \n\t"
+      "  rcall exec_spm                            \n\t"
 #endif
-      "  rjmp  end_write                     \n\t"
-      "exec_spm:                             \n\t"
+      "  rjmp  end_write                           \n\t"
+      "exec_spm:                                   \n\t"
       // Wait for previous SPM to complete
-      "wait_spm:                             \n\t"
-      "  in    r17, %[spm_reg]               \n\t"
-      "  sbrc  r17, SPMEN                    \n\t"
-      "  rjmp  wait_spm                      \n\t"
+      "wait_spm:                                   \n\t"
+      "  in    r17, %[spm_reg]                     \n\t"
+      "  sbrc  r17, %[spmen]                       \n\t"
+      "  rjmp  wait_spm                            \n\t"
       // SPM timed sequence
-      "  out %[spm_reg], r16                 \n\t"
-      "  spm                                 \n\t"
-      "  ret                                 \n\t"
-      "end_write:                            \n\t"
-      : [spm_reg] "=m" (__SPM_REG)
-      : [spm_pagesize] "M" (SPM_PAGESIZE)
-      : "r0","r16","r17","r19","r28","r29","r30","r31");
+      "  out %[spm_reg], r16                       \n\t"
+      "  spm                                       \n\t"
+      "  ret                                       \n\t"
+      "end_write:                                  \n\t"
+      :
+      : [spm_pagesize] "M" (SPM_PAGESIZE),
+        [spm_reg] "I" (_SFR_IO_ADDR(__SPM_REG)),
+        [spmen] "I" (SPMEN),
+        [pgers] "I" (PGERS),
+#if !defined(__AVR_ATtiny85__)
+        [rwwsre] "I" (RWWSRE),
+#endif
+        [pgwrt] "I" (PGWRT)
+      : "r0","r16","r17","r19","r20","r28","r29","r30","r31");
 
 // TODO: Write the page
 
