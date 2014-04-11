@@ -135,7 +135,7 @@ class Microboot:
     # Make sure there is enough data
     self.verifyRange(data, offset, length)
     # Now update the checksum
-    for val in data:
+    for val in data[offset:offset + length]:
       val = int(val)
       if (val < 0) or (val > 255):
         raise MicrobootException("Byte value is out of range (%d)." % val)
