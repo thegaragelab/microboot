@@ -478,7 +478,7 @@ class Microboot:
     address = start
     result = list()
     while read < alength:
-      response = self.sendCommand(self.createWriteCommand(address, data, written, self.DATA_SIZE))
+      response = self.sendCommand(self.createWriteCommand(address, data, written))
       if len(response) <> 0: # Should be no data in response
         raise MicrobootException("Invalid response from device.")
       result.extend(response[2:-2])
