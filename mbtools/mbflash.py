@@ -42,6 +42,7 @@ def showUsage():
 def logFunction(send, recv):
   g_logFile.write(">" + send)
   g_logFile.write("<" + recv)
+  g_logFile.flush()
 
 #----------------------------------------------------------------------------
 # Main program
@@ -64,7 +65,7 @@ if __name__ == "__main__":
       index = index + 1
       port = sys.argv[index]
     elif (arg == "--log"):
-      g_logfile = open("transfer.log", "w")
+      g_logFile = open("transfer.log", "w")
     else:
       filename = arg
       index = index + 1
@@ -114,5 +115,8 @@ if __name__ == "__main__":
     print "       " + str(ex)
     exit(1)
   mb.write(start, length, data)
-  mb.close()
+  # Now verify
+  print "Verifying data ..."
+  mb.verify(start, length, data)
+  mb.disconnect()
 
