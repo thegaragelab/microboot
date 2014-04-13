@@ -93,10 +93,10 @@ bool writeFlash() {
   uint16_t address = (((uint16_t)g_buffer[0] << 8) & 0xFF00) | g_buffer[1];
   uint8_t index, written = 0;
   while(written<DATA_SIZE) {
-    g_page_address = (address / SPM_PAGESIZE) * SPM_PAGESIZE;
+    g_page_address = ((address / SPM_PAGESIZE) * SPM_PAGESIZE);
     // Read the page into the buffer
     for(index=0; index<SPM_PAGESIZE; index++)
-      g_pagecache[index] = pgm_read_byte_near(address);
+      g_pagecache[index] = pgm_read_byte_near(g_page_address + index);
     // Add in our data
     uint8_t offset = (uint8_t)(address - g_page_address);
     for(index=0;(written<DATA_SIZE)&&((offset + index)<SPM_PAGESIZE);written++,index++)
@@ -108,45 +108,60 @@ bool writeFlash() {
       "  lds   r31, g_page_address + 1             \n\t"
       "  ldi   r28, lo8(g_pagecache)               \n\t"
       "  ldi   r29, hi8(g_pagecache)               \n\t"
-      // First erase the selected page
+      // Wait for previous SPM to complete
+      "  rcall wait_spm                            \n\t"
+      // Erase the selected page
       "  ldi   r16, (1<<%[pgers]) | (1<<%[spmen])  \n\t"
-      "  rcall exec_spm                            \n\t"
+      "  out %[spm_reg], r16                       \n\t"
+      "  spm                                       \n\t"
 #if !defined(__AVR_ATtiny85__)
+      // Wait for previous SPM to complete
+      "  rcall wait_spm                            \n\t"
       // Re-enable the RWW section
       "  ldi   r16, (1<<%[rwwsre]) | (1<<%[spmen]) \n\t"
-      "  rcall exec_spm                            \n\t"
+      "  out %[spm_reg], r16                       \n\t"
+      "  spm                                       \n\t"
 #endif
       // Transfer data from RAM to Flash page buffer
       "  ldi   r20, %[spm_pagesize]                \n\t"
       "write_loop:                                 \n\t"
+      // Wait for previous SPM to complete
+      "  rcall wait_spm                            \n\t"
       "  ld    r0, Y+                              \n\t"
       "  ld    r1, Y+                              \n\t"
       "  ldi   r16, (1<<%[spmen])                  \n\t"
-      "  rcall exec_spm                            \n\t"
+      "  out %[spm_reg], r16                       \n\t"
+      "  spm                                       \n\t"
       "  adiw  r30, 2                              \n\t"
       "  subi  r20, 2                              \n\t"
       "  brne  write_loop                          \n\t"
-      // Execute page write
-      "  subi  r30, %[spm_pagesize]                \n\t"
-      "  ldi   r16, (1<<%[pgwrt]) | (1<<%[spmen])  \n\t"
-      "  rcall exec_spm                            \n\t"
-#if !defined(__AVR_ATtiny85__)
-      // Re-enable the RWW section
-      "  ldi   r16, (1<<%[rwwsre]) | (1<<%[spmen]) \n\t"
-      "  rcall exec_spm                            \n\t"
-#endif
-      "  rjmp  end_write                           \n\t"
-      "exec_spm:                                   \n\t"
       // Wait for previous SPM to complete
-      "wait_spm:                                   \n\t"
-      "  in    r17, %[spm_reg]                     \n\t"
-      "  sbrc  r17, %[spmen]                       \n\t"
-      "  rjmp  wait_spm                            \n\t"
-      // SPM timed sequence
+      "  rcall wait_spm                            \n\t"
+      // Execute page write
+      "  lds   r30, g_page_address                 \n\t"
+      "  lds   r31, g_page_address + 1             \n\t"
+      "  ldi   r16, (1<<%[pgwrt]) | (1<<%[spmen])  \n\t"
       "  out %[spm_reg], r16                       \n\t"
       "  spm                                       \n\t"
+#if !defined(__AVR_ATtiny85__)
+      // Wait for previous SPM to complete
+      "  rcall wait_spm                            \n\t"
+      // Re-enable the RWW section
+      "  ldi   r16, (1<<%[rwwsre]) | (1<<%[spmen]) \n\t"
+      "  out %[spm_reg], r16                       \n\t"
+      "  spm                                       \n\t"
+#endif
+      // Exit the routine
+      "  rjmp   page_done                          \n\t"
+      // Wait for SPM to complete
+      "wait_spm:                                   \n\t"
+      "  lds    r17, %[spm_reg]                    \n\t"
+      "  andi   r17, 1                             \n\t"
+      "  cpi    r17, 1                             \n\t"
+      "  breq   wait_spm                           \n\t"
       "  ret                                       \n\t"
-      "end_write:                                  \n\t"
+      "page_done:                                  \n\t"
+      "  clr    __zero_reg__                       \n\t"
       :
       : [spm_pagesize] "M" (SPM_PAGESIZE),
         [spm_reg] "I" (_SFR_IO_ADDR(__SPM_REG)),
@@ -156,10 +171,7 @@ bool writeFlash() {
         [rwwsre] "I" (RWWSRE),
 #endif
         [pgwrt] "I" (PGWRT)
-      : "r0","r16","r17","r19","r20","r28","r29","r30","r31");
-
-// TODO: Write the page
-
+      : "r0","r16","r17","r20","r28","r29","r30","r31");
     // Update addresses
     address = address + written;
     }
@@ -198,7 +210,6 @@ uint8_t uartRecvHex(char ch) {
 uint8_t uartRecvData() {
   char ch;
   uint8_t data, count = 0;
-  uint16_t check = CHECKSUM_SEED;
   while(count<(BUFFER_SIZE * 2)) {
     ch = uartRecv();
     if(ch==EOL)
@@ -216,6 +227,7 @@ uint8_t uartRecvData() {
   while(ch!=EOL)
     ch = uartRecv();
   // Calculate checksum and verify it
+  uint16_t check = CHECKSUM_SEED;
   for(data=0; data<(count - CHECKSUM_SIZE); data++)
     check = checksum(check, g_buffer[data]);
   if(((check >> 8) & 0xFF)!=g_buffer[count - 2])
@@ -229,25 +241,35 @@ uint8_t uartRecvData() {
 /** Write the low nybble of the value in hex
  */
 void uartSendHex(uint8_t value) {
+  value &= 0x0F;
   if(value < 10)
     uartSend('0' + value);
   else
     uartSend('A' + value - 10);
   }
 
+/** Send a 16 bit value for debugging
+ */
+void uartDebug(uint16_t value) {
+  uartSendHex((value >> 12) & 0x0F);
+  uartSendHex((value >> 8) & 0x0F);
+  uartSendHex((value >> 4) & 0x0F);
+  uartSendHex(value & 0x0F);
+  }
+
 /** Write the buffer as a data line
  */
 void uartSendData(uint8_t size) {
   uint16_t check = CHECKSUM_SEED;
-  for(uint8_t *pData = g_buffer; size; size--,pData++) {
-    check = checksum(check, *pData);
-    uartSendHex(((*pData)>>4)&0x0F);
-    uartSendHex((*pData)&0x0F);
+  for(uint8_t index=0; index<size; index++) {
+    check = checksum(check, g_buffer[index]);
+    uartSendHex(g_buffer[index]>>4);
+    uartSendHex(g_buffer[index]);
     }
-  uartSendHex((check >> 12) & 0x0F);
-  uartSendHex((check >> 8) & 0x0F);
-  uartSendHex((check >> 4) & 0x0F);
-  uartSendHex(check & 0x0F);
+  uartSendHex(check >> 12);
+  uartSendHex(check >> 8);
+  uartSendHex(check >> 4);
+  uartSendHex(check);
   }
 
 /** Send a failure message
