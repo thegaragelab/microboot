@@ -115,5 +115,8 @@ if __name__ == "__main__":
     print "       " + str(ex)
     exit(1)
   mb.write(start, length, data)
+  # Now verify
+  print "Verifying data ..."
+  mb.verify(start, length, data)
   mb.disconnect()
 
