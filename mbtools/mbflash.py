@@ -44,6 +44,26 @@ def logFunction(send, recv):
   g_logFile.write("<" + recv)
   g_logFile.flush()
 
+def adjustStartup(info, hexfile):
+  if hexfile.minaddr() != 0:
+    return hexfile # Nothing to do
+  # Get the upper address
+  upper = info[4]
+  # We expect the first word to be 'jsr xxxxxx' (0xcxxx)
+  opcode = (hexfile[1] << 8) | hexfile[0]
+  if (opcode & 0xF000) <> 0xC000:
+    raise MicrobootException("Expected 'jsr XXX' (0xCXXX) instruction at start. Got %04x" % opcode)
+  address = (opcode & 0x0FFF) + 2
+  # Generate the correct code
+  opcode = 0xC000 | ((((upper + 1) / 2) & 0x0FFF) - 2)
+  hexfile[0] = opcode & 0xFF
+  hexfile[1] = (opcode >> 8) & 0xFF
+  # Store the address at the top of memory
+  hexfile[upper] = (address >> 8) & 0xFF
+  hexfile[upper - 1] = address & 0xFF
+  # All done
+  return hexfile
+
 #----------------------------------------------------------------------------
 # Main program
 #----------------------------------------------------------------------------
@@ -100,6 +120,10 @@ if __name__ == "__main__":
   # Load the HEX file
   hexfile = IntelHex()
   hexfile.fromfile(filename, format='hex')
+  if device == "attiny85":
+    # Adjust the code to move the RESET vector
+    hexfile = adjustStartup(info, hexfile)
+  # Set up for the write
   start = hexfile.minaddr()
   length = (hexfile.maxaddr() - start) + 1
   data = list()
