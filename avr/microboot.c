@@ -65,7 +65,13 @@ void (*application)(void) = 0x0000;
  * @return true if the bootloader entry pin is low.
  */
 inline bool bootLoaderRequired() {
-  return true;
+  // Set as input and enable pullup
+  BOOT_PORT |= (1 << BOOT_PIN);
+  bool result = BOOT_INPUT & (1 << BOOT_PIN);
+  // Disable pullup
+  BOOT_PORT &= ~(1 << BOOT_PIN);
+  // Done
+  return result;
   }
 
 /** Calculate a checksum

@@ -16,4 +16,10 @@
 #define UART_DDR  DDRB
 #define UART_PIN  PINB2
 
+// Entry Port and pin to use
+#define BOOT_PORT  PORTB
+#define BOOT_DDR   DDRB
+#define BOOT_PIN   PINB3
+#define BOOT_INPUT PINB
+
 #endif /* __HARDWARE_H */

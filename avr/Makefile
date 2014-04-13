@@ -17,7 +17,7 @@ TARGET    := microboot
 SIZE      := avr-size
 CXX       := avr-gcc
 CFLAGS    := -std=gnu99 -Wall -Os -mmcu=$(MCU) -DF_CPU=$(F_CPU) -ffreestanding
-LDFLAGS   := -mmcu=$(MCU)
+LDFLAGS   := -mmcu=$(MCU) -Wl,-Map,$(TARGET)-$(MCU).map
 OBJCOPY   := avr-objcopy
 AVRDUDE   := avrdude
 PROCESSOR :=
@@ -29,7 +29,7 @@ ifeq ($(MCU), attiny85)
   FUSE_HIGH  = 0xDD
   FUSE_LOW   = 0xE2
   FUSE_EXT   = 0xFE
-  BOOT_START = 0x1C00
+  LDFLAGS   += -Wl,--relax,--gc-sections -Wl,--section-start=.text=0x1c00
 endif
 ifeq ($(MCU), atmega8)
   PROCESSOR = m8
