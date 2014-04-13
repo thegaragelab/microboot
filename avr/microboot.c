@@ -34,7 +34,8 @@
 #define CPU_TYPE         0x01
 
 #if defined(__AVR_ATtiny85__)
-#  define CPU_MODEL 0x01
+#  define CPU_MODEL   0x01
+#  define TOP_ADDRESS 0x1BFF
 #elif defined(__AVR_ATmega8__)
 #  define CPU_MODEL 0x02
 #elif defined(__AVR_ATmega88__)
@@ -51,13 +52,6 @@ uint8_t  g_pagecache[SPM_PAGESIZE];
 //---------------------------------------------------------------------------
 // Helper functions
 //---------------------------------------------------------------------------
-
-/** Declares the main program
- *
- * Simply defines a function pointer to the base of memory. Calling it will
- * execute the main program.
- */
-void (*application)(void) = 0x0000;
 
 /** Determine if bootloader entry is required.
  *
@@ -286,6 +280,7 @@ inline void uartSendFail() {
 /** Program entry point
  */
 void main() {
+  uint8_t addr_lo, addr_hi;
   if(!bootLoaderRequired())
     goto launch;
   // Set up the UART and start processing commands
@@ -341,5 +336,21 @@ void main() {
 cleanup: // Clean up any hardware
   uartDone();
 launch: // Launch the main code
-  application();
+#ifdef __AVR_ATtiny85__
+  addr_hi = pgm_read_byte_near(TOP_ADDRESS);
+  addr_lo = pgm_read_byte_near(TOP_ADDRESS - 1);
+#else
+  addr_hi = 0;
+  addr_lo = 0;
+#endif
+  asm volatile(
+    // Y points to memory buffer, Z points to flash page
+    "  mov   r30, %[addr_lo]                     \n\t"
+    "  mov   r31, %[addr_hi]                     \n\t"
+    "  ijmp                                      \n\t"
+    :
+    : [addr_hi] "r" (addr_hi),
+      [addr_lo] "r" (addr_lo)
+    : "r30","r31");
   }
+
