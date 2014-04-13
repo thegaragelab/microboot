@@ -472,16 +472,14 @@ class Microboot:
     # is already there
     if alength <> length:
       current = self.read(start + alength - self.DATA_SIZE, self.DATA_SIZE)
-      data.extend(current[self.DATA_SIZE - (alegnth - length):])
+      data.extend(current[self.DATA_SIZE - (alength - length):])
     # Now write the data
     written = 0
     address = start
-    result = list()
-    while read < alength:
+    while written < alength:
       response = self.sendCommand(self.createWriteCommand(address, data, written))
       if len(response) <> 0: # Should be no data in response
         raise MicrobootException("Invalid response from device.")
-      result.extend(response[2:-2])
       address = address + self.DATA_SIZE
       written = written + self.DATA_SIZE
       if callback is not None:
