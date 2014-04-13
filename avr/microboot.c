@@ -47,7 +47,6 @@
 
 uint8_t  g_buffer[BUFFER_SIZE];
 uint8_t  g_pagecache[SPM_PAGESIZE];
-uint16_t g_page_address;
 
 //---------------------------------------------------------------------------
 // Helper functions
@@ -96,22 +95,24 @@ inline uint16_t checksum(uint16_t total, uint8_t data) {
 /** Write the current buffer contents into flash
  */
 bool writeFlash() {
-  uint16_t address = (((uint16_t)g_buffer[0] << 8) & 0xFF00) | g_buffer[1];
-  uint8_t index, written = 0;
+  uint16_t page_address, address = (((uint16_t)g_buffer[0] << 8) & 0xFF00) | g_buffer[1];
+  uint8_t page_hi, page_lo, index, written = 0;
   while(written<DATA_SIZE) {
-    g_page_address = ((address / SPM_PAGESIZE) * SPM_PAGESIZE);
+    page_address = ((address / SPM_PAGESIZE) * SPM_PAGESIZE);
+    page_hi = (page_address >> 8) & 0xFF;
+    page_lo = page_address & 0xFF;
     // Read the page into the buffer
     for(index=0; index<SPM_PAGESIZE; index++)
-      g_pagecache[index] = pgm_read_byte_near(g_page_address + index);
+      g_pagecache[index] = pgm_read_byte_near(page_address + index);
     // Add in our data
-    uint8_t offset = (uint8_t)(address - g_page_address);
+    uint8_t offset = (uint8_t)(address - page_address);
     for(index=0;(written<DATA_SIZE)&&((offset + index)<SPM_PAGESIZE);written++,index++)
       g_pagecache[offset + index] = g_buffer[written + 2];
     // Write the page
     asm volatile(
       // Y points to memory buffer, Z points to flash page
-      "  lds   r30, g_page_address                 \n\t"
-      "  lds   r31, g_page_address + 1             \n\t"
+      "  mov   r30, %[page_lo]                     \n\t"
+      "  mov   r31, %[page_hi]                     \n\t"
       "  ldi   r28, lo8(g_pagecache)               \n\t"
       "  ldi   r29, hi8(g_pagecache)               \n\t"
       // Wait for previous SPM to complete
@@ -144,8 +145,8 @@ bool writeFlash() {
       // Wait for previous SPM to complete
       "  rcall wait_spm                            \n\t"
       // Execute page write
-      "  lds   r30, g_page_address                 \n\t"
-      "  lds   r31, g_page_address + 1             \n\t"
+      "  mov   r30, %[page_lo]                     \n\t"
+      "  mov   r31, %[page_hi]                     \n\t"
       "  ldi   r16, (1<<%[pgwrt]) | (1<<%[spmen])  \n\t"
       "  out %[spm_reg], r16                       \n\t"
       "  spm                                       \n\t"
@@ -176,7 +177,9 @@ bool writeFlash() {
 #if !defined(__AVR_ATtiny85__)
         [rwwsre] "I" (RWWSRE),
 #endif
-        [pgwrt] "I" (PGWRT)
+        [pgwrt] "I" (PGWRT),
+        [page_hi] "r" (page_hi),
+        [page_lo] "r" (page_lo)
       : "r0","r16","r17","r20","r28","r29","r30","r31");
     // Update addresses
     address = address + written;
