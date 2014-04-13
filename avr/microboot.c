@@ -248,15 +248,6 @@ void uartSendHex(uint8_t value) {
     uartSend('A' + value - 10);
   }
 
-/** Send a 16 bit value for debugging
- */
-void uartDebug(uint16_t value) {
-  uartSendHex((value >> 12) & 0x0F);
-  uartSendHex((value >> 8) & 0x0F);
-  uartSendHex((value >> 4) & 0x0F);
-  uartSendHex(value & 0x0F);
-  }
-
 /** Write the buffer as a data line
  */
 void uartSendData(uint8_t size) {
