@@ -60,11 +60,12 @@ uint8_t  g_pagecache[SPM_PAGESIZE];
 inline bool bootLoaderRequired() {
   // Set as input and enable pullup
   BOOT_PORT |= (1 << BOOT_PIN);
+  BOOT_DDR &= ~(1 << BOOT_PIN);
   bool result = BOOT_INPUT & (1 << BOOT_PIN);
   // Disable pullup
   BOOT_PORT &= ~(1 << BOOT_PIN);
   // Done
-  return result;
+  return !result;
   }
 
 /** Calculate a checksum
