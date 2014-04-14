@@ -25,8 +25,8 @@ PROCESSOR :=
 # Fuse settings and start address
 ifeq ($(MCU), attiny85)
   PROCESSOR = t85
-#  FUSE_HIGH  = 0x5D (RESET disabled)
-  FUSE_HIGH  = 0xDD
+  FUSE_HIGH  = 0x5D
+#  FUSE_HIGH  = 0xDD (RESET enabled)
   FUSE_LOW   = 0xE2
   FUSE_EXT   = 0xFE
   LDFLAGS   += -Wl,--relax,--gc-sections -Wl,--section-start=.text=0x1c00

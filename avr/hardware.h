@@ -14,7 +14,7 @@
 // Port and pin number to use (ATtiny only)
 #define UART_PORT PORTB
 #define UART_DDR  DDRB
-#define UART_PIN  PINB2
+#define UART_PIN  PINB5
 
 // Entry Port and pin to use
 #define BOOT_PORT  PORTB
