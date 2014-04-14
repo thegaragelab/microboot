@@ -47,21 +47,25 @@ def logFunction(send, recv):
 def adjustStartup(info, hexfile):
   if hexfile.minaddr() != 0:
     return hexfile # Nothing to do
+  print "Adjusting RESET vector for bootloader support ..."
   # Get the upper address
   upper = info[4]
   # We expect the first word to be 'jsr xxxxxx' (0xcxxx)
   opcode = (hexfile[1] << 8) | hexfile[0]
   if (opcode & 0xF000) <> 0xC000:
     raise MicrobootException("Expected 'jsr XXX' (0xCXXX) instruction at start. Got %04x" % opcode)
-  address = (opcode & 0x0FFF) + 2
+  address = (opcode & 0x0FFF) + 1
+  print "Application start : %04x" % address
   # Generate the correct code
-  opcode = 0xC000 | ((((upper + 1) / 2) & 0x0FFF) - 2)
+  opcode = 0xC000 | ((((upper + 1) / 2) & 0x0FFF) - 1)
+  print "Bootloader start : %04x" % ((opcode & 0x0FFF) + 1)
   hexfile[0] = opcode & 0xFF
   hexfile[1] = (opcode >> 8) & 0xFF
   # Store the address at the top of memory
   hexfile[upper] = (address >> 8) & 0xFF
   hexfile[upper - 1] = address & 0xFF
   # All done
+  print ""
   return hexfile
 
 #----------------------------------------------------------------------------
