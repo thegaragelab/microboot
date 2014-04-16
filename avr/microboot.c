@@ -345,7 +345,7 @@ launch: // Launch the main code
   addr_lo = 0;
 #endif
   asm volatile(
-    // Y points to memory buffer, Z points to flash page
+    // Z points to the application start address
     "  mov   r30, %[addr_lo]                     \n\t"
     "  mov   r31, %[addr_hi]                     \n\t"
     "  ijmp                                      \n\t"
