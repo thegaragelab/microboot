@@ -55,6 +55,10 @@ def adjustStartup(info, hexfile):
   opcode = (hexfile[1] << 8) | hexfile[0]
   if (opcode & 0xF000) <> 0xC000:
     raise MicrobootException("Expected 'jsr XXX' (0xCXXX) instruction at start. Got %04x" % opcode)
+  # Make sure we have room to stash the address
+  if hexfile.maxaddr() >= (upper - 2):
+    raise MicrobootException("Application code would overwrite address storage location.")
+  # Calculate the application start address
   address = (opcode & 0x0FFF) + 1
   print "Application start : %04x" % address
   # Generate the correct code
