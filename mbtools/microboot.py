@@ -503,8 +503,8 @@ class Microboot:
                         that have been transferred and the number of bytes
                         requested.
 
-        @throws MicrobootException if the address is out of range or a
-                communication error occurs.
+        @throws MicrobootException if the data does not match, the address is
+                out of range or a communication error occurs.
     """
     # Read the data
     current = self.read(start, length, callback = callback)
