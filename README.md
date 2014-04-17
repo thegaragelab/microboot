@@ -14,7 +14,7 @@ a series of posts on [The Garage Lab](http://thegaragelab.com) website. These
 are:
 
 * [Microboot - A Simple Bootloader](http://thegaragelab.com/posts/microboot-a-simple-bootloader.html)
-* [Microboot on the ATtiny85](microboot-on-the-attiny85)
+* [Microboot on the ATtiny85](http://thegaragelab.com/posts/microboot-on-the-attiny85)
 
 # Version History
 
