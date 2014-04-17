@@ -2,7 +2,7 @@
 #-------------------------------------------------------------------
 # Script to build all supported targets
 #-------------------------------------------------------------------
-TARGETS="attiny85 atmega8 atmega88 atmega168"
+TARGETS="attiny85"
 
 OPTIONS=
 if [ "X$1" == "Xdebug" ]; then
