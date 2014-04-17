@@ -207,7 +207,7 @@ class Microboot:
           self.serial.write(ch)
           rcvd = self.serial.read(1)
           if rcvd <> ch:
-            raise MicrobootException("Unexpected response on serial port - got '%c', expected '%c'." % (rcvd, ch))
+            raise MicrobootException("Unexpected response on serial port - got '%c', expected '%c'." % (chr(rcvd), chr(ch)))
       else:
         written = 0
         while written < len(command):
