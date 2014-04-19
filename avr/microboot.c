@@ -53,6 +53,10 @@ uint8_t  g_pagecache[SPM_PAGESIZE];
 // Helper functions
 //---------------------------------------------------------------------------
 
+// Loop count for a 1ms delay, this is based on 6 instruction cycles per
+// loop.
+#define WAIT_1MS (F_CPU / 6000)
+
 /** Determine if bootloader entry is required.
  *
  * @return true if the bootloader entry pin is low.
@@ -61,6 +65,13 @@ inline bool bootLoaderRequired() {
   // Set as input and enable pullup
   BOOT_PORT |= (1 << BOOT_PIN);
   BOOT_DDR &= ~(1 << BOOT_PIN);
+  // Allow 2ms settling time
+  for(uint16_t inner=0; inner<(2 * WAIT_1MS); inner++) {
+    asm volatile(
+      "  nop    \n\t"
+      );
+    }
+  // Test the pin
   bool result = BOOT_INPUT & (1 << BOOT_PIN);
   // Disable pullup
   BOOT_PORT &= ~(1 << BOOT_PIN);
